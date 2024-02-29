@@ -1,0 +1,145 @@
+Well,Target,Oligo,g_Oligo,Vector,Virus_origin,Gene,Treatment,Bio_Rep,Cq
+A01,Scr,1,g11,pLKO.1_mod_CPPT,Kate,Il6,LPS,1,19.28470019
+A02,Scr,1,g11,pLKO.1_mod_CPPT,Kate,Il6,LPS,1,19.17816514
+A03,Scr,2,g12,pLKO.1_mod_CPPT,Kate,Il6,LPS,1,19.51736805
+A04,Scr,2,g12,pLKO.1_mod_CPPT,Kate,Il6,LPS,1,19.25348643
+A05,Myd88,1,g14,pLKO.1_mod_CPPT,Kate,Il6,LPS ,1,19.5324212
+A06,Myd88,1,g14,pLKO.1_mod_CPPT,Kate,Il6,LPS,1,19.42482739
+A07,Scr,1,g11,pLKO.1_mod_CPPT,Kate,Il6,LPS,2,32.43484813
+A08,Scr,1,g11,pLKO.1_mod_CPPT,Kate,Il6,LPS,2,31.34593826
+A09,Scr,2,g12,pLKO.1_mod_CPPT,Kate,Il6,LPS,2,18.74312149
+A10,Scr,2,g12,pLKO.1_mod_CPPT,Kate,Il6,LPS,2,18.89114077
+A11,Myd88,1,g14,pLKO.1_mod_CPPT,Kate,Il6,LPS ,2,19.50282349
+A12,Myd88,1,g14,pLKO.1_mod_CPPT,Kate,Il6,LPS,2,19.6537913
+B01,Scr,1,1-1 (g11),pLenti,Kate,Il6,LPS ,1,20.43771996
+B02,Scr,1,1-1 (g11),pLenti,Kate,Il6,LPS,1,19.80494534
+B03,Myd88,1,1-2 (g14),pLenti,Kate,Il6,LPS ,1,23.34229067
+B04,Myd88,1,1-2 (g14),pLenti,Kate,Il6,LPS,1,23.28267283
+B05,Myd88,2,1-3,pLenti,Kate,Il6,LPS ,1,23.35010915
+B06,Myd88,2,1-3,pLenti,Kate,Il6,LPS,1,23.32842372
+B07,Scr,1,1-1 (g11),pLenti,Kate,Il6,LPS ,2,39.25406416
+B08,Scr,1,1-1 (g11),pLenti,Kate,Il6,LPS,2,NaN
+B09,Myd88,1,1-2 (g14),pLenti,Kate,Il6,LPS ,2,23.6736277
+B10,Myd88,1,1-2 (g14),pLenti,Kate,Il6,LPS,2,23.69573481
+B11,Myd88,2,1-3,pLenti,Kate,Il6,LPS ,2,23.82095581
+B12,Myd88,2,1-3,pLenti,Kate,Il6,LPS,2,23.95492632
+C01,Scr,1,1-1 (g11),pLenti,Adil,Il6,LPS ,1,19.30818378
+C02,Scr,1,1-1 (g11),pLenti,Adil,Il6,LPS,1,19.22688389
+C03,Myd88,1,1-2 (g14),pLenti,Adil,Il6,LPS ,1,23.58625051
+C04,Myd88,1,1-2 (g14),pLenti,Adil,Il6,LPS,1,23.62921585
+C05,Myd88,2,1-3,pLenti,Adil,Il6,LPS ,1,23.78373235
+C06,Myd88,2,1-3,pLenti,Adil,Il6,LPS,1,23.97243825
+C07,Scr,1,1-1 (g11),pLenti,Adil,Il6,LPS ,2,19.37571966
+C08,Scr,1,1-1 (g11),pLenti,Adil,Il6,LPS,2,19.26243919
+C09,Myd88,1,1-2 (g14),pLenti,Adil,Il6,LPS ,2,23.84244769
+C10,Myd88,1,1-2 (g14),pLenti,Adil,Il6,LPS,2,23.87963725
+C11,Myd88,2,1-3,pLenti,Adil,Il6,LPS ,2,23.71742959
+C12,Myd88,2,1-3,pLenti,Adil,Il6,LPS,2,23.82718299
+D01,Scr,1,g11,pLKO.1_mod_CPPT,Kate,Il6,LPS,3,19.42035382
+D02,Scr,1,g11,pLKO.1_mod_CPPT,Kate,Il6,LPS,3,19.30550242
+D03,Scr,2,g12,pLKO.1_mod_CPPT,Kate,Il6,LPS,3,18.66635812
+D04,Scr,2,g12,pLKO.1_mod_CPPT,Kate,Il6,LPS,3,18.80872342
+D05,Myd88,1,g14,pLKO.1_mod_CPPT,Kate,Il6,LPS ,3,19.36939507
+D06,Myd88,1,g14,pLKO.1_mod_CPPT,Kate,Il6,LPS,3,19.41968745
+D07,Scr,1,g11,pLKO.1_mod_CPPT,Kate,Il6,LPS,4,19.12876544
+D08,Scr,1,g11,pLKO.1_mod_CPPT,Kate,Il6,LPS,4,19.24837101
+D09,Scr,2,g12,pLKO.1_mod_CPPT,Kate,Il6,LPS,4,19.14586193
+D10,Scr,2,g12,pLKO.1_mod_CPPT,Kate,Il6,LPS,4,19.16652765
+D11,Myd88,1,g14,pLKO.1_mod_CPPT,Kate,Il6,LPS ,4,19.87110171
+D12,Myd88,1,g14,pLKO.1_mod_CPPT,Kate,Il6,LPS,4,19.94454052
+E01,Scr,1,1-1 (g11),pLenti,Kate,Il6,LPS ,3,20.74509913
+E02,Scr,1,1-1 (g11),pLenti,Kate,Il6,LPS,3,20.63624695
+E03,Myd88,1,1-2 (g14),pLenti,Kate,Il6,LPS ,3,24.48530668
+E04,Myd88,1,1-2 (g14),pLenti,Kate,Il6,LPS,3,24.55690858
+E05,Myd88,2,1-3,pLenti,Kate,Il6,LPS ,3,24.3257427
+E06,Myd88,2,1-3,pLenti,Kate,Il6,LPS,3,24.12570768
+E07,Scr,1,1-1 (g11),pLenti,Kate,Il6,LPS ,4,19.97687627
+E08,Scr,1,1-1 (g11),pLenti,Kate,Il6,LPS,4,20.01606299
+E09,Myd88,1,1-2 (g14),pLenti,Kate,Il6,LPS ,4,23.98260287
+E10,Myd88,1,1-2 (g14),pLenti,Kate,Il6,LPS,4,24.04187497
+E11,Myd88,2,1-3,pLenti,Kate,Il6,LPS ,4,24.06718447
+E12,Myd88,2,1-3,pLenti,Kate,Il6,LPS,4,24.18934627
+F01,Scr,1,1-1 (g11),pLenti,Adil,Il6,LPS ,3,19.26595512
+F02,Scr,1,1-1 (g11),pLenti,Adil,Il6,LPS,3,18.88061792
+F03,Myd88,1,1-2 (g14),pLenti,Adil,Il6,LPS ,3,24.02100821
+F04,Myd88,1,1-2 (g14),pLenti,Adil,Il6,LPS,3,24.03738161
+F05,Myd88,2,1-3,pLenti,Adil,Il6,LPS ,3,24.28256623
+F06,Myd88,2,1-3,pLenti,Adil,Il6,LPS,3,24.08407497
+F07,Scr,1,1-1 (g11),pLenti,Adil,Il6,LPS ,4,19.5921109
+F08,Scr,1,1-1 (g11),pLenti,Adil,Il6,LPS,4,19.5991263
+F09,Myd88,1,1-2 (g14),pLenti,Adil,Il6,LPS ,4,23.72904653
+F10,Myd88,1,1-2 (g14),pLenti,Adil,Il6,LPS,4,23.62661394
+F11,Myd88,2,1-3,pLenti,Adil,Il6,LPS ,4,23.73401064
+F12,Myd88,2,1-3,pLenti,Adil,Il6,LPS,4,24.21681984
+G01,Scr,1,g11,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,1,20.08199929
+G02,Scr,1,g11,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,1,19.66071405
+G03,Scr,2,g12,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,1,19.7346384
+G04,Scr,2,g12,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,1,20.34322274
+G05,Myd88,1,g14,pLKO.1_mod_CPPT,Kate,Gapdh,LPS ,1,20.54564961
+G06,Myd88,1,g14,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,1,19.96487176
+G07,Scr,1,g11,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,2,30.84571773
+G08,Scr,1,g11,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,2,30.50428281
+G09,Scr,2,g12,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,2,19.42514295
+G10,Scr,2,g12,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,2,19.77173685
+G11,Myd88,1,g14,pLKO.1_mod_CPPT,Kate,Gapdh,LPS ,2,20.677743
+G12,Myd88,1,g14,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,2,19.71013473
+H01,Scr,1,1-1 (g11),pLenti,Kate,Gapdh,LPS ,1,20.71053775
+H02,Scr,1,1-1 (g11),pLenti,Kate,Gapdh,LPS,1,20.2626616
+H03,Myd88,1,1-2 (g14),pLenti,Kate,Gapdh,LPS ,1,20.05998191
+H04,Myd88,1,1-2 (g14),pLenti,Kate,Gapdh,LPS,1,20.50254237
+H05,Myd88,2,1-3,pLenti,Kate,Gapdh,LPS ,1,19.96118601
+H06,Myd88,2,1-3,pLenti,Kate,Gapdh,LPS,1,20.00574016
+H07,Scr,1,1-1 (g11),pLenti,Kate,Gapdh,LPS ,2,32.20217667
+H08,Scr,1,1-1 (g11),pLenti,Kate,Gapdh,LPS,2,31.49391751
+H09,Myd88,1,1-2 (g14),pLenti,Kate,Gapdh,LPS ,2,20.12822755
+H10,Myd88,1,1-2 (g14),pLenti,Kate,Gapdh,LPS,2,19.86659753
+H11,Myd88,2,1-3,pLenti,Kate,Gapdh,LPS ,2,20.4635251
+H12,Myd88,2,1-3,pLenti,Kate,Gapdh,LPS,2,20.70976126
+I01,Scr,1,1-1 (g11),pLenti,Adil,Gapdh,LPS ,1,20.20035084
+I02,Scr,1,1-1 (g11),pLenti,Adil,Gapdh,LPS,1,19.85829975
+I03,Myd88,1,1-2 (g14),pLenti,Adil,Gapdh,LPS ,1,19.95137532
+I04,Myd88,1,1-2 (g14),pLenti,Adil,Gapdh,LPS,1,20.06357597
+I05,Myd88,2,1-3,pLenti,Adil,Gapdh,LPS ,1,20.15011274
+I06,Myd88,2,1-3,pLenti,Adil,Gapdh,LPS,1,20.04017782
+I07,Scr,1,1-1 (g11),pLenti,Adil,Gapdh,LPS ,2,20.09756308
+I08,Scr,1,1-1 (g11),pLenti,Adil,Gapdh,LPS,2,20.0171151
+I09,Myd88,1,1-2 (g14),pLenti,Adil,Gapdh,LPS ,2,20.33670247
+I10,Myd88,1,1-2 (g14),pLenti,Adil,Gapdh,LPS,2,20.45869818
+I11,Myd88,2,1-3,pLenti,Adil,Gapdh,LPS ,2,20.55231296
+I12,Myd88,2,1-3,pLenti,Adil,Gapdh,LPS,2,20.51410631
+J01,Scr,1,g11,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,3,20.59373083
+J02,Scr,1,g11,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,3,19.61517337
+J03,Scr,2,g12,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,3,19.47842558
+J04,Scr,2,g12,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,3,19.45657025
+J05,Myd88,1,g14,pLKO.1_mod_CPPT,Kate,Gapdh,LPS ,3,19.63608291
+J06,Myd88,1,g14,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,3,19.67111735
+J07,Scr,1,g11,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,4,19.79170241
+J08,Scr,1,g11,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,4,19.80037613
+J09,Scr,2,g12,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,4,19.78631873
+J10,Scr,2,g12,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,4,19.77635548
+J11,Myd88,1,g14,pLKO.1_mod_CPPT,Kate,Gapdh,LPS ,4,20.06392895
+J12,Myd88,1,g14,pLKO.1_mod_CPPT,Kate,Gapdh,LPS,4,20.04531387
+K01,Scr,1,1-1 (g11),pLenti,Kate,Gapdh,LPS ,3,21.01145785
+K02,Scr,1,1-1 (g11),pLenti,Kate,Gapdh,LPS,3,20.88645128
+K03,Myd88,1,1-2 (g14),pLenti,Kate,Gapdh,LPS ,3,20.94794888
+K04,Myd88,1,1-2 (g14),pLenti,Kate,Gapdh,LPS,3,20.90736981
+K05,Myd88,2,1-3,pLenti,Kate,Gapdh,LPS ,3,20.18811324
+K06,Myd88,2,1-3,pLenti,Kate,Gapdh,LPS,3,20.32318745
+K07,Scr,1,1-1 (g11),pLenti,Kate,Gapdh,LPS ,4,20.50564973
+K08,Scr,1,1-1 (g11),pLenti,Kate,Gapdh,LPS,4,20.48297391
+K09,Myd88,1,1-2 (g14),pLenti,Kate,Gapdh,LPS ,4,20.34318454
+K10,Myd88,1,1-2 (g14),pLenti,Kate,Gapdh,LPS,4,20.17361279
+K11,Myd88,2,1-3,pLenti,Kate,Gapdh,LPS ,4,20.64952978
+K12,Myd88,2,1-3,pLenti,Kate,Gapdh,LPS,4,20.52584425
+L01,Scr,1,1-1 (g11),pLenti,Adil,Gapdh,LPS ,3,20.53286011
+L02,Scr,1,1-1 (g11),pLenti,Adil,Gapdh,LPS,3,20.21569269
+L03,Myd88,1,1-2 (g14),pLenti,Adil,Gapdh,LPS ,3,20.38887714
+L04,Myd88,1,1-2 (g14),pLenti,Adil,Gapdh,LPS,3,20.27515317
+L05,Myd88,2,1-3,pLenti,Adil,Gapdh,LPS ,3,20.22185701
+L06,Myd88,2,1-3,pLenti,Adil,Gapdh,LPS,3,20.42809216
+L07,Scr,1,1-1 (g11),pLenti,Adil,Gapdh,LPS ,4,20.54327465
+L08,Scr,1,1-1 (g11),pLenti,Adil,Gapdh,LPS,4,20.43861335
+L09,Myd88,1,1-2 (g14),pLenti,Adil,Gapdh,LPS ,4,20.24917947
+L10,Myd88,1,1-2 (g14),pLenti,Adil,Gapdh,LPS,4,20.50886439
+L11,Myd88,2,1-3,pLenti,Adil,Gapdh,LPS ,4,21.12916078
+L12,Myd88,2,1-3,pLenti,Adil,Gapdh,LPS,4,21.14065907

@@ -1,0 +1,56 @@
+### Title: Analysis of Cytokine BMDC qPCR Data 12/10/22
+### Author: Kate Johnson
+### Date: 12/10/22
+### Add'tl Notes:
+
+# libraries----
+```{r load libraries, warning=FALSE}
+library(tidyverse)
+library(cowplot) #add on to ggplot that has some nice functionality (save_plot())
+library(fs)
+```
+
+
+# directories----
+```{r}
+wd = getwd()
+date = format(Sys.Date(), format = "%m_%d_%Y")
+
+input_dir = path(wd, "../input/data/0_raw_data")
+code_dir = wd
+output_dir = path(wd, str_c("../output/", date))
+
+if(!dir.exists(output_dir)){
+  dir.create(output_dir)
+}
+  
+```
+
+# sources ----
+```{r}
+source(fs::path(code_dir, "3_analysis_functions.R"))
+source(fs::path(code_dir, "4_plotting_fxns.R"))
+```
+
+# load data----
+```{r}
+##read in data
+il6 = read_csv(fs::path(input_dir, "KJ_IL6_230123.csv")) 
+cxcl1 = read_csv(fs::path(input_dir, "KJ_CXCL1_230123.csv")) 
+
+```
+
+# format data ----
+```{r}
+il6_pivot = il6 %>%
+            rename_at(vars(1), ~gsub(".*", "row", .)) %>%
+            pivot_longer(cols = -1, names_to = "column", values_to = "absorbance") %>%
+            mutate("well" = str_c(row, column), .after =2) %>%
+            #filter out row G and col 12 (empty)
+            filter(row != "G" & column != "12") %>%
+            mutate(treatment = ,
+                   time = )
+            
+head(il6_pivot)
+```
+

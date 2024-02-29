@@ -1,0 +1,208 @@
+### Title: Analysis of Cytokine BMDC qPCR Data 12/10/22
+### Author: Kate Johnson
+### Date: 12/10/22
+### Add'tl Notes:
+
+# libraries----
+```{r load libraries, warning=FALSE}
+library(tidyverse)
+library(cowplot) #add on to ggplot that has some nice functionality (save_plot())
+library(fs)
+```
+
+
+# directories----
+```{r}
+wd = getwd()
+date = format(Sys.Date(), format = "%m_%d_%Y")
+
+input_dir = path(wd, "../input/data/2_formatted_data")
+code_dir = wd
+output_dir = path(wd, str_c("../output/", date))
+
+if(!dir.exists(output_dir)){
+  dir.create(output_dir)
+}
+  
+```
+
+# sources ----
+```{r}
+source(fs::path(code_dir, "3_analysis_functions.R"))
+source(fs::path(code_dir, "4_plotting_fxns.R"))
+```
+
+# load data----
+```{r}
+##read in data
+#dat1
+qPCR_dat = read.csv(fs::path(input_dir, "BMDC_qPCR_formatted_120822.csv")) 
+
+#dat2
+exp2_plate1 = read.csv(fs::path(input_dir,
+           "../0_raw_data/BMDC_LS_2h_6h_Cxcl2Gapdh_repeat_120822_KJ -  Quantification Summary.csv"))
+exp2_plate2 = read.csv(fs::path(input_dir,
+           "../0_raw_data/bmdc_ls_2h_6h_Il6_120822 -  Quantification Summary.csv"))
+
+#dat3
+plate3 = read.csv(fs::path(input_dir,
+            "../0_raw_data/bmdc_LS_2h_6h_Cxcl1_Il27 -  Quantification Summary.csv"))
+
+```
+
+# data manipulation for exps 2 & 3 to format correcly
+```{r data_manip}
+exp2A = exp2_plate1 %>%
+       dplyr::select(c(Well, Cq)) %>% # remove unnecssary columns
+       drop_na() %>% #remove Nas
+            # Add gene info (in this case A-F & M1-6are Cxcl2, rest are Gapdh)
+       mutate(Gene = ifelse(grepl("[A-F]|M0[1-6]", Well), "Cxcl2", "Gapdh"),
+            # Add Treatment info (1-2,7-8 = L, 3-4, 9-10 = S,
+            #rest are LS (M is all control))
+              Treatment = ifelse(grepl("[A-L]0[1-2;7-8]", Well), "L",
+                                  ifelse(grepl("[A-L][0-1][0;3-4;9]", Well), "S",
+                                         ifelse(grepl("M", Well), "Control", "LS"))),
+            # Add Time info (1-6 are h6, 7-12 are h2, Row M is all controls)
+              Time = ifelse(grepl("[A-L]0[1-6]", Well), "6",
+                            ifelse(grepl("M", Well), "0", "2")),
+            # Add Dose info (A/D/G/J = low, B/E/H/K = med, C/F/I/L = high, M = none)
+              Dose = ifelse(grepl("Control", Treatment), "none",
+                            ifelse(grepl("[A;D;G;J]", Well), "low", 
+                                   ifelse(grepl("[B;E;H;K]", Well), "med", "high"))),
+            # Add Biol_Rep info (A-C and G-I are biol rep1, as are M1-2,7-8;
+                                 #D-F, J-L are rep2, as are M3-4, 9-10;
+                                  #M5-6, 11-12 are rep3)
+              Biol_Rep = ifelse(grepl("[A-C;G-I]|M0[1-2;7-8]", Well), "1",
+                                ifelse(grepl("[D-F;J-L]|M[0-1][0;3-4;9]", Well), "2", "3")),
+            # Finally Add Tech_Rep info (odds are 1, evens are 2 -- check remainder of well # to decide)
+              Tech_Rep = ifelse(as.numeric(gsub("[A-P]", "", Well)) %% 2 != 0, "1", "2"))
+
+exp2B = exp2_plate2 %>%
+       dplyr::select(c(Well, Cq)) %>% # remove unnecssary columns
+       drop_na() %>% #remove Nas
+            # Add gene info (in this case everything is Il6)
+       mutate(Gene = "Il6",
+            # Add Treatment info (1-2,7-8 = L, 3-4, 9-10 = S,
+            #rest are LS (M is all control))
+              Treatment = ifelse(grepl("[A-F]0[1-2;7-8]", Well), "L",
+                                  ifelse(grepl("[A-F][0-1][0;3-4;9]", Well), "S",
+                                         ifelse(grepl("G", Well), "Control", "LS"))),
+            # Add Time info (1-6 are h6, 7-12 are h2, Row M is all controls)
+              Time = ifelse(grepl("[A-F]0[1-6]", Well), "6",
+                            ifelse(grepl("G", Well), "0", "2")),
+            # Add Dose info (A/D = low, B/E = med, C/F = high)
+              Dose = ifelse(grepl("Control", Treatment), "none",
+                            ifelse(grepl("[A;D]", Well), "low", 
+                                   ifelse(grepl("[B;E]", Well), "med", "high"))),
+            # Add Biol_Rep info (A-C are biol rep1, as are G1-2;
+                                 #D-F,  are rep2, as are G3-4;
+                                  #G5-6, are rep3)
+              Biol_Rep = ifelse(grepl("[A-C]|G0[1-2]", Well), "1",
+                                ifelse(grepl("[D-F]|G0[3-4]", Well), "2", "3")),
+            # Finally Add Tech_Rep info (odds are 1, evens are 2 -- check remainder of well # to decide)
+              Tech_Rep = ifelse(as.numeric(gsub("[A-P]", "", Well)) %% 2 != 0, "1", "2"))
+
+
+exp3 = plate3 %>% 
+       dplyr::select(c(Well, Cq)) %>% # remove unnecssary columns
+       drop_na() %>% #remove Nas
+            # Add gene info (in this case A-F & M1-6are Il27, rest are Cxcl1)
+       mutate(Gene = ifelse(grepl("[A-F]|M0[1-6]", Well), "Il27", "Cxcl1"),
+            # Add Treatment info (1-2,7-8 = L, 3-4, 9-10 = S,
+            #rest are LS (M is all control))
+              Treatment = ifelse(grepl("[A-L]0[1-2;7-8]", Well), "L",
+                                  ifelse(grepl("[A-L][0-1][0;3-4;9]", Well), "S",
+                                         ifelse(grepl("M", Well), "Control", "LS"))),
+            # Add Time info (1-6 are h6, 7-12 are h2, Row M is all controls)
+              Time = ifelse(grepl("[A-L]0[1-6]", Well), "6",
+                            ifelse(grepl("M", Well), "0", "2")),
+            # Add Biol_Rep info (A-C and G-I are biol rep1, as are M1-2,7-8;
+                                 #D-F, J-L are rep2, as are M3-4, 9-10;
+                                  #M5-6, 11-12 are rep3)
+            # Add Dose Info (A-B;G-H = low, C-D;I-J = med, EF;K-L = high, controls = none)
+              Dose = ifelse(grepl("Control", Treatment), "none",
+                            ifelse(grepl("[A-B;G-H]", Well), "low", 
+                                   ifelse(grepl("[C-D; I-J]", Well), "med", "high"))),
+              Biol_Rep = ifelse(grepl("[A;C;E;G;I;K]|M0[1-2;7-8]", Well), "1",
+                                ifelse(grepl("[B;D;F;J;H;L]|M[0-1][0;3-4;9]", Well), "2", "3")),
+            # Finally Add Tech_Rep info (odds are 1, evens are 2 -- check remainder of well # to decide)
+              Tech_Rep = ifelse(as.numeric(gsub("[A-P]", "", Well)) %% 2 != 0, "1", "2")) %>%
+            #filter out bad data 
+            filter(!(Tech_Rep == "2" & grepl("[I;M]", Well)))
+
+full_dat = do.call(rbind, list(exp2A, exp2B, exp3))
+
+```
+
+
+# analyze data----
+#exp1
+```{r}
+dat1 = analyze_qPCR_dat(qPCR_dat, save_dir = output_dir, save_name= "120822_qPCR1", save =T)$ddCq_dat
+dat2 = analyze_qPCR_dat(full_dat, save_dir = output_dir, save_name= "120822_qPCR2_full", save =T)$ddCq_dat
+
+ 
+dat1 = dat1 %>%
+       mutate(Type = ifelse(nchar(Treatment) ==2, "Pair", "Single"), #assign type info for coloring in plot
+             Treatment = factor(Treatment, levels = c("L", "S", "LS")), #factor treatment for correct ordering
+             Dose = factor(Dose, levels = c("low", "med", "high")), #factor dose for correct ordering
+             Time = str_c(Time, " hours"), #change time for preferred labeling (can also use labeller in ggplot)
+             Time = factor(Time, levels = c("2 hours", "6 hours"))) #factor time for correct ordering
+
+dat2 = dat2 %>%
+       mutate(Type = ifelse(nchar(Treatment) ==2, "Pair", "Single"), #assign type info for coloring in plot
+             Treatment = factor(Treatment, levels = c("L", "S", "LS")), #factor treatment for correct ordering
+             Dose = factor(Dose, levels = c("low", "med", "high")), #factor dose for correct ordering
+             Time = str_c(Time, "h"), #change time for preferred labeling (can also use labeller in ggplot)
+             Time = factor(Time, levels = c("2h", "6h"))) #factor time for correct ordering
+```
+
+
+#exp2 plotting
+```{r, warning = FALSE}
+#data, x, fill_color, alpha, grouping_var, facet_varx (row), facet_vary  (col)
+make_qPCR_plot(dat2 %>% filter(Gene == "Il6" | Gene == "Il27"), Treatment, Type, Dose, Dose, Time, Gene, title = NULL, 
+               save_dir = output_dir, save_name = "Exp2_byDose_Il6-27", save = T)
+dat2_dose_v = make_qPCR_plot(dat2, Treatment, Type, Dose, Dose, Time, Gene, title = "qPCR Exp 2", 
+               save_dir = output_dir, save_name = "Exp2_byDose_vertical", save = T)
+
+dat2_time = make_qPCR_plot(dat2, Treatment, 
+                            Type, Time, Time, Gene, Dose, title = NULL) +
+               geom_text(aes(x = Treatment, y = Avg_expression + se_expression, label = Time, fill = Time),
+                         stat = "identity", position = position_dodge(0.9),
+                         vjust = -1.5, size = rel(2))
+
+dat2_treat = make_qPCR_plot(dat2, Time,
+                                 Type, Treatment, Treatment, Gene, Dose, title = NULL) +
+               geom_text(mapping = aes(x = Time, y = Avg_expression + se_expression, 
+                             label = Treatment, fill = Treatment, alpha = Treatment),
+                         stat = "identity", position = position_dodge(0.9),
+                         vjust = -1.5, size = rel(2))
+
+save_plot(path(output_dir, "120822_qPCR2_full/plots/Exp2_qPCR_plot_byTime_all_vertical.pdf"), dat2_time, dpi=90)
+  
+
+make_qPCR_plot(dat2 %>% filter(Gene == "Cxcl1" | Gene == "Cxcl2"), Treatment, Type, Dose, Dose, Time, Gene, title = NULL)
+```
+
+# plot & save data----
+
+#exp1
+```{r, warning = FALSE}
+#data, x, fill_color, alpha, grouping_var, facet_varx (row), facet_vary  (col)
+dat1_dose = make_qPCR_plot(dat1, Treatment, Type, Dose, Dose, Time, Gene, title = "qPCR Exp 1", 
+               save_dir = output_dir, save_name = "Exp1_plot_byDose", save = T)
+dat1_time = make_qPCR_plot(dat1, Treatment, Type, Time, Time, Dose, Gene, title = "qPCR Exp 1") +
+               geom_text(aes(x = Treatment, y = Avg_expression + se_expression, label = Time, fill = Time),
+                         stat = "identity", position = position_dodge(0.9),
+                         vjust = -1.5, size = rel(2))
+dat1_treatment = make_qPCR_plot(dat1, Time, Type, Treatment, Treatment, Dose, Gene, title = "qPCR Exp 1") +
+               geom_text(mapping = aes(x = Time, y = Avg_expression + se_expression, 
+                             label = Treatment, fill = Treatment, alpha = Treatment),
+                         stat = "identity", position = position_dodge(0.9),
+                         vjust = -1.5, size = rel(2))
+
+save_plot(path(output_dir, "Exp1_qPCR_plot_byTreat.pdf"), dat1_treatment, dpi=90)
+```
+
+

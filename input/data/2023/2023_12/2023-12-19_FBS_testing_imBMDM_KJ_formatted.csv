@@ -1,0 +1,271 @@
+Well,Experiment,Treatment,Media_type,HI,Bio_Rep,Gene,Cq
+A01,FBS_testing,LPS (100 ng/ul),current_FBS,yes,1,Tnfa,20.22482042
+A02,FBS_testing,LPS (100 ng/ul),current_FBS,yes,1,Tnfa,19.63827017
+A03,FBS_testing,LPS (100 ng/ul),current_FBS,yes,2,Tnfa,19.84988115
+A04,FBS_testing,LPS (100 ng/ul),current_FBS,yes,2,Tnfa,19.68174328
+A05,FBS_testing,PAM (250 ng/ul),current_FBS,yes,1,Tnfa,19.25651311
+A06,FBS_testing,PAM (250 ng/ul),current_FBS,yes,1,Tnfa,19.06450365
+A07,FBS_testing,PAM (250 ng/ul),current_FBS,yes,2,Tnfa,18.77989637
+A08,FBS_testing,PAM (250 ng/ul),current_FBS,yes,2,Tnfa,18.6761518
+A09,FBS_testing,Control,current_FBS,yes,1,Tnfa,24.55468062
+A10,FBS_testing,Control,current_FBS,yes,1,Tnfa,24.11776988
+A11,FBS_testing,Control,current_FBS,yes,2,Tnfa,36.11381732
+A12,FBS_testing,Control,current_FBS,yes,2,Tnfa,34.60073718
+A13,imBMDM,Control,,,1,Tnfa,24.87419947
+A14,imBMDM,Control,,,1,Tnfa,24.71730605
+A15,imBMDM,Control,,,2,Tnfa,23.86199548
+A16,imBMDM,Control,,,2,Tnfa,23.74800363
+A17,imBMDM,Control,,,3,Tnfa,24.06309471
+A18,imBMDM,Control,,,3,Tnfa,23.83935484
+B01,FBS_testing,LPS (100 ng/ul),Premium_plus,yes,1,Tnfa,19.59113049
+B02,FBS_testing,LPS (100 ng/ul),Premium_plus,yes,1,Tnfa,18.99756398
+B03,FBS_testing,LPS (100 ng/ul),Premium_plus,yes,2,Tnfa,19.05121512
+B04,FBS_testing,LPS (100 ng/ul),Premium_plus,yes,2,Tnfa,19.06303238
+B05,FBS_testing,PAM (250 ng/ul),Premium_plus,yes,1,Tnfa,19.21621201
+B06,FBS_testing,PAM (250 ng/ul),Premium_plus,yes,1,Tnfa,19.23666885
+B07,FBS_testing,PAM (250 ng/ul),Premium_plus,yes,2,Tnfa,18.55436972
+B08,FBS_testing,PAM (250 ng/ul),Premium_plus,yes,2,Tnfa,18.63478493
+B09,FBS_testing,Control,Premium_plus,yes,1,Tnfa,23.83678352
+B10,FBS_testing,Control,Premium_plus,yes,1,Tnfa,23.9124237
+B11,FBS_testing,Control,Premium_plus,yes,2,Tnfa,23.50426324
+B12,FBS_testing,Control,Premium_plus,yes,2,Tnfa,23.67927291
+B13,imBMDM,LPS_1h,,,1,Tnfa,19.10259324
+B14,imBMDM,LPS_1h,,,1,Tnfa,19.03090967
+B15,imBMDM,LPS_1h,,,2,Tnfa,18.58472902
+B16,imBMDM,LPS_1h,,,2,Tnfa,18.53203594
+B17,imBMDM,LPS_1h,,,3,Tnfa,18.63492368
+B18,imBMDM,LPS_1h,,,3,Tnfa,18.62254253
+C01,FBS_testing,LPS (100 ng/ul),premium_minus,no,1,Tnfa,19.10145786
+C02,FBS_testing,LPS (100 ng/ul),premium_minus,no,1,Tnfa,19.17556151
+C03,FBS_testing,LPS (100 ng/ul),premium_minus,no,2,Tnfa,19.12884967
+C04,FBS_testing,LPS (100 ng/ul),premium_minus,no,2,Tnfa,19.03564951
+C05,FBS_testing,PAM (250 ng/ul),premium_minus,no,1,Tnfa,19.0436702
+C06,FBS_testing,PAM (250 ng/ul),premium_minus,no,1,Tnfa,19.05767953
+C07,FBS_testing,PAM (250 ng/ul),premium_minus,no,2,Tnfa,18.76942093
+C08,FBS_testing,PAM (250 ng/ul),premium_minus,no,2,Tnfa,18.50539151
+C09,FBS_testing,Control,premium_minus,no,1,Tnfa,23.0953733
+C10,FBS_testing,Control,premium_minus,no,1,Tnfa,22.95873861
+C11,FBS_testing,Control,premium_minus,no,2,Tnfa,23.34808677
+C12,FBS_testing,Control,premium_minus,no,2,Tnfa,23.42373555
+C13,imBMDM,LPS_2h,,,1,Tnfa,19.36843526
+C14,imBMDM,LPS_2h,,,1,Tnfa,19.15467921
+C15,imBMDM,LPS_2h,,,2,Tnfa,19.03109976
+C16,imBMDM,LPS_2h,,,2,Tnfa,19.38379363
+C17,imBMDM,LPS_2h,,,3,Tnfa,18.59485629
+C18,imBMDM,LPS_2h,,,3,Tnfa,19.11699821
+D01,FBS_testing,LPS (100 ng/ul),select_plus,yes,1,Tnfa,18.64915371
+D02,FBS_testing,LPS (100 ng/ul),select_plus,yes,1,Tnfa,18.56472417
+D03,FBS_testing,LPS (100 ng/ul),select_plus,yes,2,Tnfa,18.61394313
+D04,FBS_testing,LPS (100 ng/ul),select_plus,yes,2,Tnfa,18.7870456
+D05,FBS_testing,PAM (250 ng/ul),select_plus,yes,1,Tnfa,18.40141367
+D06,FBS_testing,PAM (250 ng/ul),select_plus,yes,1,Tnfa,18.48266166
+D07,FBS_testing,PAM (250 ng/ul),select_plus,yes,2,Tnfa,18.37729726
+D08,FBS_testing,PAM (250 ng/ul),select_plus,yes,2,Tnfa,18.59540088
+D09,FBS_testing,Control,select_plus,yes,1,Tnfa,23.46824913
+D10,FBS_testing,Control,select_plus,yes,1,Tnfa,23.55084938
+D11,FBS_testing,Control,select_plus,yes,2,Tnfa,24.12099429
+D12,FBS_testing,Control,select_plus,yes,2,Tnfa,24.26727865
+D13,imBMDM,LPS_4h,,,1,Tnfa,19.45693176
+D14,imBMDM,LPS_4h,,,1,Tnfa,19.3904695
+D15,imBMDM,LPS_4h,,,2,Tnfa,18.69912841
+D16,imBMDM,LPS_4h,,,2,Tnfa,18.588828
+D17,imBMDM,LPS_4h,,,3,Tnfa,19.13590314
+D18,imBMDM,LPS_4h,,,3,Tnfa,19.2040014
+E01,FBS_testing,LPS (100 ng/ul),select_minus,no,1,Tnfa,19.10126736
+E02,FBS_testing,LPS (100 ng/ul),select_minus,no,1,Tnfa,18.90851675
+E03,FBS_testing,LPS (100 ng/ul),select_minus,no,2,Tnfa,19.63263851
+E04,FBS_testing,LPS (100 ng/ul),select_minus,no,2,Tnfa,19.52800998
+E05,FBS_testing,PAM (250 ng/ul),select_minus,no,1,Tnfa,19.0786062
+E06,FBS_testing,PAM (250 ng/ul),select_minus,no,1,Tnfa,19.07928873
+E07,FBS_testing,PAM (250 ng/ul),select_minus,no,2,Tnfa,19.06280338
+E08,FBS_testing,PAM (250 ng/ul),select_minus,no,2,Tnfa,19.05287923
+E09,FBS_testing,Control,select_minus,no,1,Tnfa,23.4542078
+E10,FBS_testing,Control,select_minus,no,1,Tnfa,23.48427032
+E11,FBS_testing,Control,select_minus,no,2,Tnfa,23.88388098
+E12,FBS_testing,Control,select_minus,no,2,Tnfa,24.13270877
+E13,imBMDM,LPS_6h,,,1,Tnfa,19.7214635
+E14,imBMDM,LPS_6h,,,1,Tnfa,19.56592124
+E15,imBMDM,LPS_6h,,,2,Tnfa,19.44051019
+E16,imBMDM,LPS_6h,,,2,Tnfa,19.69543459
+E17,imBMDM,LPS_6h,,,3,Tnfa,19.61547733
+E18,imBMDM,LPS_6h,,,3,Tnfa,18.93803866
+F01,FBS_testing,LPS (100 ng/ul),current_FBS,yes,1,Cxcl10,17.16209881
+F02,FBS_testing,LPS (100 ng/ul),current_FBS,yes,1,Cxcl10,17.28044467
+F03,FBS_testing,LPS (100 ng/ul),current_FBS,yes,2,Cxcl10,17.42674112
+F04,FBS_testing,LPS (100 ng/ul),current_FBS,yes,2,Cxcl10,17.74911515
+F05,FBS_testing,PAM (250 ng/ul),current_FBS,yes,1,Cxcl10,22.9130508
+F06,FBS_testing,PAM (250 ng/ul),current_FBS,yes,1,Cxcl10,22.6959594
+F07,FBS_testing,PAM (250 ng/ul),current_FBS,yes,2,Cxcl10,23.03792916
+F08,FBS_testing,PAM (250 ng/ul),current_FBS,yes,2,Cxcl10,23.13658483
+F09,FBS_testing,Control,current_FBS,yes,1,Cxcl10,26.60126469
+F10,FBS_testing,Control,current_FBS,yes,1,Cxcl10,26.20473853
+F11,FBS_testing,Control,current_FBS,yes,2,Cxcl10,NaN
+F12,FBS_testing,Control,current_FBS,yes,2,Cxcl10,NaN
+F13,imBMDM,Control,,,1,Cxcl10,28.22277646
+F14,imBMDM,Control,,,1,Cxcl10,28.16416234
+F15,imBMDM,Control,,,2,Cxcl10,27.80956007
+F16,imBMDM,Control,,,2,Cxcl10,28.08002712
+F17,imBMDM,Control,,,3,Cxcl10,28.43126575
+F18,imBMDM,Control,,,3,Cxcl10,27.95058173
+G01,FBS_testing,LPS (100 ng/ul),Premium_plus,yes,1,Cxcl10,18.09576867
+G02,FBS_testing,LPS (100 ng/ul),Premium_plus,yes,1,Cxcl10,17.84392819
+G03,FBS_testing,LPS (100 ng/ul),Premium_plus,yes,2,Cxcl10,17.89842812
+G04,FBS_testing,LPS (100 ng/ul),Premium_plus,yes,2,Cxcl10,17.52830588
+G05,FBS_testing,PAM (250 ng/ul),Premium_plus,yes,1,Cxcl10,24.94586271
+G06,FBS_testing,PAM (250 ng/ul),Premium_plus,yes,1,Cxcl10,25.03501642
+G07,FBS_testing,PAM (250 ng/ul),Premium_plus,yes,2,Cxcl10,24.53932448
+G08,FBS_testing,PAM (250 ng/ul),Premium_plus,yes,2,Cxcl10,24.60540407
+G09,FBS_testing,Control,Premium_plus,yes,1,Cxcl10,28.43660272
+G10,FBS_testing,Control,Premium_plus,yes,1,Cxcl10,28.77114118
+G11,FBS_testing,Control,Premium_plus,yes,2,Cxcl10,27.79692784
+G12,FBS_testing,Control,Premium_plus,yes,2,Cxcl10,27.1301775
+G13,imBMDM,LPS_1h,,,1,Cxcl10,20.02060663
+G14,imBMDM,LPS_1h,,,1,Cxcl10,19.88267056
+G15,imBMDM,LPS_1h,,,2,Cxcl10,20.0544817
+G16,imBMDM,LPS_1h,,,2,Cxcl10,20.58057907
+G17,imBMDM,LPS_1h,,,3,Cxcl10,20.32487558
+G18,imBMDM,LPS_1h,,,3,Cxcl10,20.01368252
+H01,FBS_testing,LPS (100 ng/ul),premium_minus,no,1,Cxcl10,17.13028265
+H02,FBS_testing,LPS (100 ng/ul),premium_minus,no,1,Cxcl10,17.09037171
+H03,FBS_testing,LPS (100 ng/ul),premium_minus,no,2,Cxcl10,17.49216571
+H04,FBS_testing,LPS (100 ng/ul),premium_minus,no,2,Cxcl10,17.34750576
+H05,FBS_testing,PAM (250 ng/ul),premium_minus,no,1,Cxcl10,24.22685091
+H06,FBS_testing,PAM (250 ng/ul),premium_minus,no,1,Cxcl10,23.89967249
+H07,FBS_testing,PAM (250 ng/ul),premium_minus,no,2,Cxcl10,23.74979603
+H08,FBS_testing,PAM (250 ng/ul),premium_minus,no,2,Cxcl10,23.55903803
+H09,FBS_testing,Control,premium_minus,no,1,Cxcl10,27.81350852
+H10,FBS_testing,Control,premium_minus,no,1,Cxcl10,27.77099596
+H11,FBS_testing,Control,premium_minus,no,2,Cxcl10,28.6098283
+H12,FBS_testing,Control,premium_minus,no,2,Cxcl10,28.60832272
+H13,imBMDM,LPS_2h,,,1,Cxcl10,18.05083971
+H14,imBMDM,LPS_2h,,,1,Cxcl10,18.05477314
+H15,imBMDM,LPS_2h,,,2,Cxcl10,18.25639255
+H16,imBMDM,LPS_2h,,,2,Cxcl10,17.94696805
+H17,imBMDM,LPS_2h,,,3,Cxcl10,17.97647237
+H18,imBMDM,LPS_2h,,,3,Cxcl10,17.73383391
+I01,FBS_testing,LPS (100 ng/ul),select_plus,yes,1,Cxcl10,18.02909807
+I02,FBS_testing,LPS (100 ng/ul),select_plus,yes,1,Cxcl10,17.73869814
+I03,FBS_testing,LPS (100 ng/ul),select_plus,yes,2,Cxcl10,17.5466806
+I04,FBS_testing,LPS (100 ng/ul),select_plus,yes,2,Cxcl10,17.88213787
+I05,FBS_testing,PAM (250 ng/ul),select_plus,yes,1,Cxcl10,24.62717193
+I06,FBS_testing,PAM (250 ng/ul),select_plus,yes,1,Cxcl10,24.68063827
+I07,FBS_testing,PAM (250 ng/ul),select_plus,yes,2,Cxcl10,23.79759962
+I08,FBS_testing,PAM (250 ng/ul),select_plus,yes,2,Cxcl10,23.88810095
+I09,FBS_testing,Control,select_plus,yes,1,Cxcl10,29.04545915
+I10,FBS_testing,Control,select_plus,yes,1,Cxcl10,28.883841
+I11,FBS_testing,Control,select_plus,yes,2,Cxcl10,29.34078363
+I12,FBS_testing,Control,select_plus,yes,2,Cxcl10,29.67696289
+I13,imBMDM,LPS_4h,,,1,Cxcl10,18.04727917
+I14,imBMDM,LPS_4h,,,1,Cxcl10,18.29512474
+I15,imBMDM,LPS_4h,,,2,Cxcl10,17.30541385
+I16,imBMDM,LPS_4h,,,2,Cxcl10,17.36140175
+I17,imBMDM,LPS_4h,,,3,Cxcl10,17.92821035
+I18,imBMDM,LPS_4h,,,3,Cxcl10,17.55745836
+J01,FBS_testing,LPS (100 ng/ul),select_minus,no,1,Cxcl10,17.15929761
+J02,FBS_testing,LPS (100 ng/ul),select_minus,no,1,Cxcl10,17.30951485
+J03,FBS_testing,LPS (100 ng/ul),select_minus,no,2,Cxcl10,17.54531353
+J04,FBS_testing,LPS (100 ng/ul),select_minus,no,2,Cxcl10,17.77572312
+J05,FBS_testing,PAM (250 ng/ul),select_minus,no,1,Cxcl10,23.98283629
+J06,FBS_testing,PAM (250 ng/ul),select_minus,no,1,Cxcl10,23.61347463
+J07,FBS_testing,PAM (250 ng/ul),select_minus,no,2,Cxcl10,22.56882297
+J08,FBS_testing,PAM (250 ng/ul),select_minus,no,2,Cxcl10,22.56580044
+J09,FBS_testing,Control,select_minus,no,1,Cxcl10,27.41271111
+J10,FBS_testing,Control,select_minus,no,1,Cxcl10,27.48276454
+J11,FBS_testing,Control,select_minus,no,2,Cxcl10,27.1087559
+J12,FBS_testing,Control,select_minus,no,2,Cxcl10,27.36516431
+J13,imBMDM,LPS_6h,,,1,Cxcl10,17.68727941
+J14,imBMDM,LPS_6h,,,1,Cxcl10,17.04586247
+J15,imBMDM,LPS_6h,,,2,Cxcl10,17.21942981
+J16,imBMDM,LPS_6h,,,2,Cxcl10,17.22376204
+J17,imBMDM,LPS_6h,,,3,Cxcl10,17.50476307
+J18,imBMDM,LPS_6h,,,3,Cxcl10,17.16676955
+L01,FBS_testing,LPS (100 ng/ul),Premium_plus,yes,1,Gapdh,19.80990077
+L02,FBS_testing,LPS (100 ng/ul),Premium_plus,yes,1,Gapdh,19.46290422
+L03,FBS_testing,LPS (100 ng/ul),Premium_plus,yes,2,Gapdh,19.55152881
+L04,FBS_testing,LPS (100 ng/ul),Premium_plus,yes,2,Gapdh,19.77402252
+L05,FBS_testing,PAM (250 ng/ul),Premium_plus,yes,1,Gapdh,19.59023733
+L06,FBS_testing,PAM (250 ng/ul),Premium_plus,yes,1,Gapdh,20.11160039
+L07,FBS_testing,PAM (250 ng/ul),Premium_plus,yes,2,Gapdh,19.27387006
+L08,FBS_testing,PAM (250 ng/ul),Premium_plus,yes,2,Gapdh,19.50059875
+L09,FBS_testing,Control,Premium_plus,yes,1,Gapdh,19.77882588
+L10,FBS_testing,Control,Premium_plus,yes,1,Gapdh,20.096822
+L11,FBS_testing,Control,Premium_plus,yes,2,Gapdh,19.90390599
+L12,FBS_testing,Control,Premium_plus,yes,2,Gapdh,20.42909808
+L13,imBMDM,LPS_1h,,,1,Gapdh,18.17200798
+L14,imBMDM,LPS_1h,,,1,Gapdh,18.17482869
+L15,imBMDM,LPS_1h,,,2,Gapdh,17.97725694
+L16,imBMDM,LPS_1h,,,2,Gapdh,18.31866163
+L17,imBMDM,LPS_1h,,,3,Gapdh,17.8281144
+L18,imBMDM,LPS_1h,,,3,Gapdh,18.96385767
+M01,FBS_testing,LPS (100 ng/ul),premium_minus,no,1,Gapdh,19.24623725
+M02,FBS_testing,LPS (100 ng/ul),premium_minus,no,1,Gapdh,19.15108993
+M03,FBS_testing,LPS (100 ng/ul),premium_minus,no,2,Gapdh,19.25019058
+M04,FBS_testing,LPS (100 ng/ul),premium_minus,no,2,Gapdh,19.48800364
+M05,FBS_testing,PAM (250 ng/ul),premium_minus,no,1,Gapdh,19.21414065
+M06,FBS_testing,PAM (250 ng/ul),premium_minus,no,1,Gapdh,19.42402456
+M07,FBS_testing,PAM (250 ng/ul),premium_minus,no,2,Gapdh,18.76501028
+M08,FBS_testing,PAM (250 ng/ul),premium_minus,no,2,Gapdh,19.26695701
+M09,FBS_testing,Control,premium_minus,no,1,Gapdh,19.09584348
+M10,FBS_testing,Control,premium_minus,no,1,Gapdh,19.38551442
+M11,FBS_testing,Control,premium_minus,no,2,Gapdh,19.63825508
+M12,FBS_testing,Control,premium_minus,no,2,Gapdh,20.06528809
+M13,imBMDM,LPS_2h,,,1,Gapdh,18.61565877
+M14,imBMDM,LPS_2h,,,1,Gapdh,17.94636768
+M15,imBMDM,LPS_2h,,,2,Gapdh,18.05424438
+M16,imBMDM,LPS_2h,,,2,Gapdh,18.4899708
+M17,imBMDM,LPS_2h,,,3,Gapdh,18.14470807
+M18,imBMDM,LPS_2h,,,3,Gapdh,17.99820264
+N01,FBS_testing,LPS (100 ng/ul),select_plus,yes,1,Gapdh,19.49927359
+N02,FBS_testing,LPS (100 ng/ul),select_plus,yes,1,Gapdh,19.05244507
+N03,FBS_testing,LPS (100 ng/ul),select_plus,yes,2,Gapdh,19.37969226
+N04,FBS_testing,LPS (100 ng/ul),select_plus,yes,2,Gapdh,19.49390539
+N05,FBS_testing,PAM (250 ng/ul),select_plus,yes,1,Gapdh,19.0077734
+N06,FBS_testing,PAM (250 ng/ul),select_plus,yes,1,Gapdh,19.28646833
+N07,FBS_testing,PAM (250 ng/ul),select_plus,yes,2,Gapdh,19.10573741
+N08,FBS_testing,PAM (250 ng/ul),select_plus,yes,2,Gapdh,19.11070115
+N09,FBS_testing,Control,select_plus,yes,1,Gapdh,19.66216329
+N10,FBS_testing,Control,select_plus,yes,1,Gapdh,19.62671603
+N11,FBS_testing,Control,select_plus,yes,2,Gapdh,20.26494955
+N12,FBS_testing,Control,select_plus,yes,2,Gapdh,20.27620907
+N13,imBMDM,LPS_4h,,,1,Gapdh,18.76114717
+N14,imBMDM,LPS_4h,,,1,Gapdh,18.88029493
+N15,imBMDM,LPS_4h,,,2,Gapdh,18.19223824
+N16,imBMDM,LPS_4h,,,2,Gapdh,18.10598844
+N17,imBMDM,LPS_4h,,,3,Gapdh,17.92244013
+N18,imBMDM,LPS_4h,,,3,Gapdh,17.49040522
+O01,FBS_testing,LPS (100 ng/ul),select_minus,no,1,Gapdh,19.34057267
+O02,FBS_testing,LPS (100 ng/ul),select_minus,no,1,Gapdh,19.02009632
+O03,FBS_testing,LPS (100 ng/ul),select_minus,no,2,Gapdh,20.00576041
+O04,FBS_testing,LPS (100 ng/ul),select_minus,no,2,Gapdh,20.20514289
+O05,FBS_testing,PAM (250 ng/ul),select_minus,no,1,Gapdh,19.54926009
+O06,FBS_testing,PAM (250 ng/ul),select_minus,no,1,Gapdh,19.54429261
+O07,FBS_testing,PAM (250 ng/ul),select_minus,no,2,Gapdh,19.72771181
+O08,FBS_testing,PAM (250 ng/ul),select_minus,no,2,Gapdh,19.77496836
+O09,FBS_testing,Control,select_minus,no,1,Gapdh,19.91821729
+O10,FBS_testing,Control,select_minus,no,1,Gapdh,19.86763228
+O11,FBS_testing,Control,select_minus,no,2,Gapdh,20.33214418
+O12,FBS_testing,Control,select_minus,no,2,Gapdh,20.26203444
+O13,imBMDM,LPS_6h,,,1,Gapdh,17.83097006
+O14,imBMDM,LPS_6h,,,1,Gapdh,17.78648044
+O15,imBMDM,LPS_6h,,,2,Gapdh,18.16575588
+O16,imBMDM,LPS_6h,,,2,Gapdh,18.06142779
+O17,imBMDM,LPS_6h,,,3,Gapdh,18.40449059
+O18,imBMDM,LPS_6h,,,3,Gapdh,18.43108751
+P01,FBS_testing,LPS (100 ng/ul),current_FBS,yes,1,Gapdh,19.44684384
+P02,FBS_testing,LPS (100 ng/ul),current_FBS,yes,1,Gapdh,20.01360574
+P03,FBS_testing,LPS (100 ng/ul),current_FBS,yes,2,Gapdh,19.7670879
+P04,FBS_testing,LPS (100 ng/ul),current_FBS,yes,2,Gapdh,19.69334598
+P05,FBS_testing,PAM (250 ng/ul),current_FBS,yes,1,Gapdh,19.32412016
+P06,FBS_testing,PAM (250 ng/ul),current_FBS,yes,1,Gapdh,19.35311937
+P07,FBS_testing,PAM (250 ng/ul),current_FBS,yes,2,Gapdh,19.15130189
+P08,FBS_testing,PAM (250 ng/ul),current_FBS,yes,2,Gapdh,19.15938879
+P09,FBS_testing,Control,current_FBS,yes,1,Gapdh,19.64526689
+P10,FBS_testing,Control,current_FBS,yes,1,Gapdh,20.09850613
+P11,FBS_testing,Control,current_FBS,yes,2,Gapdh,30.15828447
+P12,FBS_testing,Control,current_FBS,yes,2,Gapdh,30.39644068
+P13,imBMDM,Control,,,1,Gapdh,17.32203777
+P14,imBMDM,Control,,,1,Gapdh,17.44001742
+P15,imBMDM,Control,,,2,Gapdh,17.3153762
+P16,imBMDM,Control,,,2,Gapdh,17.65742007
+P17,imBMDM,Control,,,3,Gapdh,17.26513689
+P18,imBMDM,Control,,,3,Gapdh,17.30619301

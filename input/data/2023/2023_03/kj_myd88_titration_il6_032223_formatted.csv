@@ -1,0 +1,218 @@
+Well,Target,Oligo,Vector,Virus_origin,Virus_amount,Gene,Treatment,Bio_Rep,Cq
+A01,Scr,g11,pLenti_CPPT,Kate,5,Il6,LPS,1,20.02386554
+A02,Scr,g11,pLenti_CPPT,Kate,5,Il6,LPS,1,20.11380346
+A03,Scr,g12,pLenti_CPPT,Kate,5,Il6,LPS,1,19.7525064
+A04,Scr,g12,pLenti_CPPT,Kate,5,Il6,LPS,1,19.68396631
+A05,Myd88,g14,pLenti_CPPT,Kate,5,Il6,LPS,1,20.21627088
+A06,Myd88,g14,pLenti_CPPT,Kate,5,Il6,LPS,1,20.19068611
+A07,Scr,g11,pLenti_CPPT,Kate,10,Il6,LPS,1,19.98589967
+A08,Scr,g11,pLenti_CPPT,Kate,10,Il6,LPS,1,20.0389323
+A09,Scr,g12,pLenti_CPPT,Kate,10,Il6,LPS,1,18.85687016
+A10,Scr,g12,pLenti_CPPT,Kate,10,Il6,LPS,1,19.25692295
+A11,Myd88,g14,pLenti_CPPT,Kate,10,Il6,LPS,1,19.7242825
+A12,Myd88,g14,pLenti_CPPT,Kate,10,Il6,LPS,1,19.87684061
+A13,Scr,g11,pLenti_CPPT,Kate,20,Il6,LPS,1,19.30495727
+A14,Scr,g11,pLenti_CPPT,Kate,20,Il6,LPS,1,19.44330823
+A15,Scr,g12,pLenti_CPPT,Kate,20,Il6,LPS,1,18.60200667
+A16,Scr,g12,pLenti_CPPT,Kate,20,Il6,LPS,1,19.05754136
+A17,Myd88,g14,pLenti_CPPT,Kate,20,Il6,LPS,1,19.36216374
+A18,Myd88,g14,pLenti_CPPT,Kate,20,Il6,LPS,1,19.46484929
+B01,Scr,g11,pLenti_CPPT,Kate,5,Il6,LPS,2,20.81138036
+B02,Scr,g11,pLenti_CPPT,Kate,5,Il6,LPS,2,20.2746663
+B03,Scr,g12,pLenti_CPPT,Kate,5,Il6,LPS,2,20.23337633
+B04,Scr,g12,pLenti_CPPT,Kate,5,Il6,LPS,2,20.18932262
+B05,Myd88,g14,pLenti_CPPT,Kate,5,Il6,LPS,2,20.16697799
+B06,Myd88,g14,pLenti_CPPT,Kate,5,Il6,LPS,2,20.02434036
+B07,Scr,g11,pLenti_CPPT,Kate,10,Il6,LPS,2,19.37106521
+B08,Scr,g11,pLenti_CPPT,Kate,10,Il6,LPS,2,19.38761221
+B09,Scr,g12,pLenti_CPPT,Kate,10,Il6,LPS,2,19.15841856
+B10,Scr,g12,pLenti_CPPT,Kate,10,Il6,LPS,2,19.19855723
+B11,Myd88,g14,pLenti_CPPT,Kate,10,Il6,LPS,2,20.31104453
+B12,Myd88,g14,pLenti_CPPT,Kate,10,Il6,LPS,2,20.4772488
+B13,Scr,g11,pLenti_CPPT,Kate,20,Il6,LPS,2,19.40939207
+B14,Scr,g11,pLenti_CPPT,Kate,20,Il6,LPS,2,19.38888762
+B15,Scr,g12,pLenti_CPPT,Kate,20,Il6,LPS,2,19.28109995
+B16,Scr,g12,pLenti_CPPT,Kate,20,Il6,LPS,2,19.59959348
+B17,Myd88,g14,pLenti_CPPT,Kate,20,Il6,LPS,2,20.02025559
+B18,Myd88,g14,pLenti_CPPT,Kate,20,Il6,LPS,2,19.92146591
+B19,Untrans. (+puro),,,,0,Il6,None,1,36.24275305
+B20,Untrans. (+puro),,,,0,Il6,None,1,35.30420837
+C01,Scr,g11,pLenti_CPPT,Kate,5,Il6,None,1,34.5305614
+C02,Scr,g11,pLenti_CPPT,Kate,5,Il6,None,1,33.40975684
+C03,Scr,g12,pLenti_CPPT,Kate,5,Il6,None,1,33.50091217
+C04,Scr,g12,pLenti_CPPT,Kate,5,Il6,None,1,32.33561872
+C05,Myd88,g14,pLenti_CPPT,Kate,5,Il6,None,1,32.76848974
+C06,Myd88,g14,pLenti_CPPT,Kate,5,Il6,None,1,33.45289009
+C07,Scr,g11,pLenti_CPPT,Kate,10,Il6,None,1,35.61936203
+C08,Scr,g11,pLenti_CPPT,Kate,10,Il6,None,1,36.21422522
+C09,Scr,g12,pLenti_CPPT,Kate,10,Il6,None,1,34.68462863
+C10,Scr,g12,pLenti_CPPT,Kate,10,Il6,None,1,32.65109913
+C11,Myd88,g14,pLenti_CPPT,Kate,10,Il6,None,1,33.13932488
+C12,Myd88,g14,pLenti_CPPT,Kate,10,Il6,None,1,33.38263386
+C13,Scr,g11,pLenti_CPPT,Kate,20,Il6,None,1,32.67681068
+C14,Scr,g11,pLenti_CPPT,Kate,20,Il6,None,1,33.7797508
+C15,Scr,g12,pLenti_CPPT,Kate,20,Il6,None,1,32.61120773
+C16,Scr,g12,pLenti_CPPT,Kate,20,Il6,None,1,34.07563417
+C17,Myd88,g14,pLenti_CPPT,Kate,20,Il6,None,1,31.45950059
+C18,Myd88,g14,pLenti_CPPT,Kate,20,Il6,None,1,31.3411944
+C19,Untrans. (-puro),,,,0,Il6,LPS,1,19.22734434
+C20,Untrans. (-puro),,,,0,Il6,LPS,1,19.01371567
+D01,Scr,g11,pLenti_CPPT,Kate,5,Il6,None,2,34.61119474
+D02,Scr,g11,pLenti_CPPT,Kate,5,Il6,None,2,33.09386238
+D03,Scr,g12,pLenti_CPPT,Kate,5,Il6,None,2,33.77466479
+D04,Scr,g12,pLenti_CPPT,Kate,5,Il6,None,2,33.41356674
+D05,Myd88,g14,pLenti_CPPT,Kate,5,Il6,None,2,33.35148684
+D07,Scr,g11,pLenti_CPPT,Kate,10,Il6,None,2,34.27577738
+D08,Scr,g11,pLenti_CPPT,Kate,10,Il6,None,2,33.6047025
+D09,Scr,g12,pLenti_CPPT,Kate,10,Il6,None,2,33.19275356
+D10,Scr,g12,pLenti_CPPT,Kate,10,Il6,None,2,33.32536773
+D11,Myd88,g14,pLenti_CPPT,Kate,10,Il6,None,2,34.11182866
+D12,Myd88,g14,pLenti_CPPT,Kate,10,Il6,None,2,34.2344665
+D13,Scr,g11,pLenti_CPPT,Kate,20,Il6,None,2,33.99381793
+D14,Scr,g11,pLenti_CPPT,Kate,20,Il6,None,2,34.56304192
+D15,Scr,g12,pLenti_CPPT,Kate,20,Il6,None,2,33.91552887
+D16,Scr,g12,pLenti_CPPT,Kate,20,Il6,None,2,33.40449176
+D17,Myd88,g14,pLenti_CPPT,Kate,20,Il6,None,2,33.90190652
+D18,Myd88,g14,pLenti_CPPT,Kate,20,Il6,None,2,34.37879935
+E01,Scr,g11,pLenti_CPPT,Kate,30,Il6,LPS,1,19.18649297
+E02,Scr,g11,pLenti_CPPT,Kate,30,Il6,LPS,1,19.21276305
+E03,Scr,g12,pLenti_CPPT,Kate,30,Il6,LPS,1,19.12154333
+E04,Scr,g12,pLenti_CPPT,Kate,30,Il6,LPS,1,19.1822415
+E05,Myd88,g14,pLenti_CPPT,Kate,30,Il6,LPS,1,19.61979275
+E06,Myd88,g14,pLenti_CPPT,Kate,30,Il6,LPS,1,20.1354502
+E07,Scr,1-1 (g11),pLenti,Adil,20,Il6,LPS,1,19.40095933
+E08,Scr,1-1 (g11),pLenti,Adil,20,Il6,LPS,1,19.12486944
+E09,Myd88,1-2 (g14),pLenti,Adil,20,Il6,LPS,1,24.09006474
+E10,Myd88,1-2 (g14),pLenti,Adil,20,Il6,LPS,1,24.08547485
+E11,Myd88,1-3,pLenti,Adil,20,Il6,LPS,1,24.27833548
+E12,Myd88,1-3,pLenti,Adil,20,Il6,LPS,1,24.40579804
+E13,Scr,1-1 (g11),pLenti,Adil,20,Il6,LPS,2,20.05912922
+E14,Scr,1-1 (g11),pLenti,Adil,20,Il6,LPS,2,19.56562208
+E15,Myd88,1-2 (g14),pLenti,Adil,20,Il6,LPS,2,25.20977366
+E16,Myd88,1-2 (g14),pLenti,Adil,20,Il6,LPS,2,25.41264106
+E17,Myd88,1-3,pLenti,Adil,20,Il6,LPS,2,25.82302949
+E18,Myd88,1-3,pLenti,Adil,20,Il6,LPS,2,25.06856681
+F01,Scr,1-1 (g11),pLenti,Adil,20,Il6,None,1,33.59900672
+F02,Scr,1-1 (g11),pLenti,Adil,20,Il6,None,1,32.28290812
+F03,Myd88,1-2 (g14),pLenti,Adil,20,Il6,None,1,34.77147556
+F04,Myd88,1-2 (g14),pLenti,Adil,20,Il6,None,1,33.89541281
+F05,Myd88,1-3,pLenti,Adil,20,Il6,None,1,32.80314649
+F06,Myd88,1-3,pLenti,Adil,20,Il6,None,1,34.32119103
+F07,Scr,1-1 (g11),pLenti,Adil,20,Il6,None,2,34.20787557
+F08,Scr,1-1 (g11),pLenti,Adil,20,Il6,None,2,33.72827337
+F09,Myd88,1-2 (g14),pLenti,Adil,20,Il6,None,2,33.4281217
+F10,Myd88,1-2 (g14),pLenti,Adil,20,Il6,None,2,32.48375092
+F11,Myd88,1-3,pLenti,Adil,20,Il6,None,2,33.20383337
+F12,Myd88,1-3,pLenti,Adil,20,Il6,None,2,33.25601641
+F13,Untrans. (-puro),,,,0,Il6,None,1,31.75329139
+F14,Untrans. (-puro),,,,0,Il6,None,1,32.33450501
+G01,Scr,g11,pLenti_CPPT,Kate,5,Gapdh,LPS,1,19.84637177
+G02,Scr,g11,pLenti_CPPT,Kate,5,Gapdh,LPS,1,20.22119268
+G03,Scr,g12,pLenti_CPPT,Kate,5,Gapdh,LPS,1,20.24502961
+G04,Scr,g12,pLenti_CPPT,Kate,5,Gapdh,LPS,1,20.35553968
+G05,Myd88,g14,pLenti_CPPT,Kate,5,Gapdh,LPS,1,20.09522959
+G06,Myd88,g14,pLenti_CPPT,Kate,5,Gapdh,LPS,1,20.02809003
+G07,Scr,g11,pLenti_CPPT,Kate,10,Gapdh,LPS,1,20.2909819
+G08,Scr,g11,pLenti_CPPT,Kate,10,Gapdh,LPS,1,20.18889858
+G09,Scr,g12,pLenti_CPPT,Kate,10,Gapdh,LPS,1,20.07288301
+G10,Scr,g12,pLenti_CPPT,Kate,10,Gapdh,LPS,1,20.21115715
+G11,Myd88,g14,pLenti_CPPT,Kate,10,Gapdh,LPS,1,21.3979083
+G12,Myd88,g14,pLenti_CPPT,Kate,10,Gapdh,LPS,1,21.22171667
+G13,Scr,g11,pLenti_CPPT,Kate,20,Gapdh,LPS,1,20.71976177
+G14,Scr,g11,pLenti_CPPT,Kate,20,Gapdh,LPS,1,20.83342449
+G15,Scr,g12,pLenti_CPPT,Kate,20,Gapdh,LPS,1,20.43130978
+G16,Scr,g12,pLenti_CPPT,Kate,20,Gapdh,LPS,1,21.09800574
+G17,Myd88,g14,pLenti_CPPT,Kate,20,Gapdh,LPS,1,21.27639294
+G18,Myd88,g14,pLenti_CPPT,Kate,20,Gapdh,LPS,1,20.81060165
+G19,Untrans. (+puro),,,,0,Gapdh,LPS,1,28.56505986
+G20,Untrans. (+puro),,,,0,Gapdh,LPS,1,28.97701064
+H01,Scr,g11,pLenti_CPPT,Kate,5,Gapdh,LPS,2,20.09182733
+H02,Scr,g11,pLenti_CPPT,Kate,5,Gapdh,LPS,2,20.05531304
+H03,Scr,g12,pLenti_CPPT,Kate,5,Gapdh,LPS,2,20.2984712
+H04,Scr,g12,pLenti_CPPT,Kate,5,Gapdh,LPS,2,20.33946728
+H05,Myd88,g14,pLenti_CPPT,Kate,5,Gapdh,LPS,2,20.07078071
+H06,Myd88,g14,pLenti_CPPT,Kate,5,Gapdh,LPS,2,19.99637433
+H07,Scr,g11,pLenti_CPPT,Kate,10,Gapdh,LPS,2,20.25021684
+H08,Scr,g11,pLenti_CPPT,Kate,10,Gapdh,LPS,2,20.13376908
+H09,Scr,g12,pLenti_CPPT,Kate,10,Gapdh,LPS,2,19.82856063
+H10,Scr,g12,pLenti_CPPT,Kate,10,Gapdh,LPS,2,19.5502368
+H11,Myd88,g14,pLenti_CPPT,Kate,10,Gapdh,LPS,2,20.60223355
+H12,Myd88,g14,pLenti_CPPT,Kate,10,Gapdh,LPS,2,20.80527432
+H13,Scr,g11,pLenti_CPPT,Kate,20,Gapdh,LPS,2,20.71442871
+H14,Scr,g11,pLenti_CPPT,Kate,20,Gapdh,LPS,2,20.50397017
+H15,Scr,g12,pLenti_CPPT,Kate,20,Gapdh,LPS,2,20.69029827
+H16,Scr,g12,pLenti_CPPT,Kate,20,Gapdh,LPS,2,20.8454852
+H17,Myd88,g14,pLenti_CPPT,Kate,20,Gapdh,LPS,2,20.21373282
+H18,Myd88,g14,pLenti_CPPT,Kate,20,Gapdh,LPS,2,20.83122513
+H19,Untrans. (+puro),,,,0,Gapdh,None,2,28.6126382
+H20,Untrans. (+puro),,,,0,Gapdh,None,2,28.29188703
+I01,Scr,g11,pLenti_CPPT,Kate,5,Gapdh,None,1,20.23791636
+I02,Scr,g11,pLenti_CPPT,Kate,5,Gapdh,None,1,19.96750671
+I03,Scr,g12,pLenti_CPPT,Kate,5,Gapdh,None,1,19.97852613
+I04,Scr,g12,pLenti_CPPT,Kate,5,Gapdh,None,1,20.1046099
+I05,Myd88,g14,pLenti_CPPT,Kate,5,Gapdh,None,1,20.05746215
+I06,Myd88,g14,pLenti_CPPT,Kate,5,Gapdh,None,1,19.56958608
+I07,Scr,g11,pLenti_CPPT,Kate,10,Gapdh,None,1,20.13899637
+I08,Scr,g11,pLenti_CPPT,Kate,10,Gapdh,None,1,20.04134157
+I09,Scr,g12,pLenti_CPPT,Kate,10,Gapdh,None,1,19.83910612
+I10,Scr,g12,pLenti_CPPT,Kate,10,Gapdh,None,1,19.77958679
+I11,Myd88,g14,pLenti_CPPT,Kate,10,Gapdh,None,1,20.45836379
+I12,Myd88,g14,pLenti_CPPT,Kate,10,Gapdh,None,1,20.68513408
+I13,Scr,g11,pLenti_CPPT,Kate,20,Gapdh,None,1,20.64940217
+I14,Scr,g11,pLenti_CPPT,Kate,20,Gapdh,None,1,20.55845799
+I15,Scr,g12,pLenti_CPPT,Kate,20,Gapdh,None,1,19.95695582
+I16,Scr,g12,pLenti_CPPT,Kate,20,Gapdh,None,1,20.14627487
+I17,Myd88,g14,pLenti_CPPT,Kate,20,Gapdh,None,1,20.10752411
+I18,Myd88,g14,pLenti_CPPT,Kate,20,Gapdh,None,1,19.71229064
+I19,Untrans. (-puro),,,,0,Gapdh,LPS,1,21.04169837
+I20,Untrans. (-puro),,,,0,Gapdh,LPS,1,21.00666704
+J01,Scr,g11,pLenti_CPPT,Kate,5,Gapdh,None,2,20.04606003
+J02,Scr,g11,pLenti_CPPT,Kate,5,Gapdh,None,2,19.78964918
+J03,Scr,g12,pLenti_CPPT,Kate,5,Gapdh,None,2,19.66051419
+J04,Scr,g12,pLenti_CPPT,Kate,5,Gapdh,None,2,19.7892592
+J05,Myd88,g14,pLenti_CPPT,Kate,5,Gapdh,None,2,19.70469903
+J06,Myd88,g14,pLenti_CPPT,Kate,5,Gapdh,None,2,19.65849549
+J07,Scr,g11,pLenti_CPPT,Kate,10,Gapdh,None,2,20.15552832
+J08,Scr,g11,pLenti_CPPT,Kate,10,Gapdh,None,2,20.26751932
+J09,Scr,g12,pLenti_CPPT,Kate,10,Gapdh,None,2,19.62008051
+J10,Scr,g12,pLenti_CPPT,Kate,10,Gapdh,None,2,19.5247526
+J11,Myd88,g14,pLenti_CPPT,Kate,10,Gapdh,None,2,20.62903409
+J12,Myd88,g14,pLenti_CPPT,Kate,10,Gapdh,None,2,20.6632901
+J13,Scr,g11,pLenti_CPPT,Kate,20,Gapdh,None,2,20.65553905
+J14,Scr,g11,pLenti_CPPT,Kate,20,Gapdh,None,2,20.5321049
+J15,Scr,g12,pLenti_CPPT,Kate,20,Gapdh,None,2,19.59460728
+J16,Scr,g12,pLenti_CPPT,Kate,20,Gapdh,None,2,20.26487537
+J17,Myd88,g14,pLenti_CPPT,Kate,20,Gapdh,None,2,20.53487895
+J18,Myd88,g14,pLenti_CPPT,Kate,20,Gapdh,None,2,19.93802393
+K01,Scr,g11,pLenti_CPPT,Kate,30,Gapdh,LPS,1,20.85964492
+K02,Scr,g11,pLenti_CPPT,Kate,30,Gapdh,LPS,1,20.85030095
+K03,Scr,g12,pLenti_CPPT,Kate,30,Gapdh,LPS,1,20.60899946
+K04,Scr,g12,pLenti_CPPT,Kate,30,Gapdh,LPS,1,20.53286311
+K05,Myd88,g14,pLenti_CPPT,Kate,30,Gapdh,LPS,1,19.93515742
+K06,Myd88,g14,pLenti_CPPT,Kate,30,Gapdh,LPS,1,19.90292747
+K07,Scr,1-1 (g11),pLenti,Adil,20,Gapdh,LPS,1,20.46819187
+K08,Scr,1-1 (g11),pLenti,Adil,20,Gapdh,LPS,1,20.4923233
+K09,Myd88,1-2 (g14),pLenti,Adil,20,Gapdh,LPS,1,19.99446517
+K10,Myd88,1-2 (g14),pLenti,Adil,20,Gapdh,LPS,1,20.03347116
+K11,Myd88,1-3,pLenti,Adil,20,Gapdh,LPS,1,21.01961448
+K12,Myd88,1-3,pLenti,Adil,20,Gapdh,LPS,1,20.9426901
+K13,Scr,1-1 (g11),pLenti,Adil,20,Gapdh,LPS,2,21.26449557
+K14,Scr,1-1 (g11),pLenti,Adil,20,Gapdh,LPS,2,20.71772584
+K15,Myd88,1-2 (g14),pLenti,Adil,20,Gapdh,LPS,2,21.1286492
+K16,Myd88,1-2 (g14),pLenti,Adil,20,Gapdh,LPS,2,21.22251335
+K17,Myd88,1-3,pLenti,Adil,20,Gapdh,LPS,2,21.44916056
+K18,Myd88,1-3,pLenti,Adil,20,Gapdh,LPS,2,20.50255695
+L01,Scr,1-1 (g11),pLenti,Adil,20,Gapdh,None,1,19.5159123
+L02,Scr,1-1 (g11),pLenti,Adil,20,Gapdh,None,1,19.66875544
+L03,Myd88,1-2 (g14),pLenti,Adil,20,Gapdh,None,1,20.37355323
+L04,Myd88,1-2 (g14),pLenti,Adil,20,Gapdh,None,1,20.12448479
+L05,Myd88,1-3,pLenti,Adil,20,Gapdh,None,1,19.83687924
+L06,Myd88,1-3,pLenti,Adil,20,Gapdh,None,1,19.54204076
+L07,Scr,1-1 (g11),pLenti,Adil,20,Gapdh,None,2,19.94575086
+L08,Scr,1-1 (g11),pLenti,Adil,20,Gapdh,None,2,19.92113306
+L09,Myd88,1-2 (g14),pLenti,Adil,20,Gapdh,None,2,20.05012191
+L10,Myd88,1-2 (g14),pLenti,Adil,20,Gapdh,None,2,20.007025
+L11,Myd88,1-3,pLenti,Adil,20,Gapdh,None,2,19.99648764
+L12,Myd88,1-3,pLenti,Adil,20,Gapdh,None,2,19.98541708
+L13,Untrans. (-puro),,,,0,Gapdh,None,1,22.08055018
+L14,Untrans. (-puro),,,,0,Gapdh,None,1,22.1754956
