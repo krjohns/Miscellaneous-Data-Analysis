@@ -1,0 +1,87 @@
+---
+title: "Glu_inhibitor_coculture"
+author: "Kate Johnson"
+date: "2024-07-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# libraries ----
+```{r}
+library(tidyverse)
+library(fs)
+library(cowplot)
+library(ggpubr) # for stats
+```
+
+# directories ----
+```{r}
+wd = getwd()
+input_dir = fs::path(wd, "../../input/data")
+output_dir = fs::path(wd, "../../output/2024/2024_08/20240805/Glu_inhib_coculture6")
+```
+
+# load data ----
+```{r}
+dat = read.csv(path(input_dir, "2024/2024_08/20240805_glu_inhib_cocult6.csv")) 
+```
+
+
+#bar plots
+```{r}
+plot_me = dat %>%
+          #factor drug list
+          mutate(Drug1 = factor(Drug1, levels = c("None", 
+                                              "DMSO (0.12%)","AAA (10mM)",
+                                               "Erastin (12uM)",
+                                              "Cerestat (25uM)", "D-AP5 (1mM)")),
+                 Drug2 = factor(Drug2, levels = c("None", "spike-in",
+                                              "DMSO (0.12%)","AAA (10mM)",
+                                               "Erastin (12uM)","Cerestat (25uM)",
+                                              "D-AP5 (1mM)")),
+                 Treatment = factor(Treatment, levels = c("OVA", "LSG+OVA"))) %>%
+          group_by(Drug1, Drug2, DMSO, Treatment) %>%
+          mutate(avg_live = mean(Live),
+                 se_live = sd(Live)/sqrt(3),
+                 avg_prolif = mean(Proliferated),
+                 se_prolif = sd(Proliferated)/sqrt(3)) %>%
+          arrange(Drug2, Drug1, DMSO, Treatment)
+plot_me2 = plot_me %>%
+           mutate(Name = ifelse(Drug2 !="None",
+                                str_c(Drug1, "+\n", Drug2), as.character(Drug1)),
+                  Name = factor(Name, levels = unique(Name)))
+
+means = plot_me2 %>% ungroup() %>% select(Name, Treatment, avg_prolif, avg_live) %>% unique()
+
+
+#plot
+ggplot(plot_me2, 
+       aes(x = Name,
+           y = avg_prolif)) +
+  geom_col(aes(y = avg_prolif,
+               fill = Treatment), 
+               position = position_dodge2(width =1,preserve = "total"), 
+            color = "black") +
+  geom_point(data = means,
+             position = position_dodge2(width = 1, preserve = "total"),
+             size = 1) +
+  geom_hline(aes(yintercept = 56.3), linetype =2) +
+  scale_fill_manual(values = c("OVA" = "white",
+                                "LSG+OVA" = "#F68064")) +
+  facet_wrap(~Drug1, scales ="free_x", nrow =1) +
+  labs(x = NULL, y = "% Proliferated") +
+  theme(axis.text.x =element_text(angle =45,hjust =1),
+        #axis.text.x = element_blank(),
+        text = element_text(size=8),
+        legend.position = "none") 
+
+p
+save_plot(path(output_dir, "Combos_Exp_live_AAA_DAP5.pdf"), p,
+          base_aspect_ratio = 1)
+
+
+```
+
+
