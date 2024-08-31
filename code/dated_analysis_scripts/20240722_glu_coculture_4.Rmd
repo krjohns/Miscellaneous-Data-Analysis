@@ -73,17 +73,13 @@ plot_me = dat %>%
                             #         "None \n(Treated)", Drug)),
                  Drug = factor(Drug, levels = c("None", # \n(Untreated)", "None \n(Treated)",
                                                 "DMSO", "Glutamate", "AAA",
-                                               "Erastin", "DL-AP4", "CPCCOEt",
-                                               "MPEP", "Cerestat", "D-AP5",
-                                               "DNQX")),
+                                               "Erastin","Cerestat", "D-AP5",
+                                               "DNQX", "MPEP", "DL-AP4", "CPCCOEt")),
                  Treatment = factor(Treatment, levels = c("OVA", "LSG+OVA"))) %>%
           group_by(Drug, Concentration, Unit, Dilution, Treatment) %>%
-          #mutate(Max = max(Concentration)) %>%
-          #ungroup() %>%
-          #filter(Concentration == Max) %>%
-          #group_by(Drug) %>%
-          mutate(avg = mean(Proliferated),
-                 se = sd(Proliferated)/sqrt(3),
+          filter(!(Drug %in% c("DMSO", "Glutamate"))) %>%
+          mutate(avg = mean(Live),
+                 se = sd(Live)/sqrt(3),
                  Drug2 = ifelse(grepl("None", Drug),"None",
                                 str_c(Drug, " (", round(Concentration,2), Unit, ")"))) %>%
           arrange(Drug, desc(Concentration))
@@ -93,7 +89,7 @@ means = plot_me2 %>% select(Drug, Drug2, avg) %>% unique()
 
 p<-ggplot(plot_me2, 
        aes(x = Drug2, 
-           y = Proliferated,)) +
+           y = Live,)) +
   geom_col(data = means, aes(y = avg,
                              alpha = as.character(Dilution),
                              fill = Treatment), 
@@ -103,18 +99,22 @@ p<-ggplot(plot_me2,
                   #fill = Treatment), 
     position = position_dodge2(width = 1, preserve = "total"),
     size = 1) +
+  geom_errorbar(aes(ymin=avg-se, max=avg + se), color = "black",
+                                  width=0.5, size = 1) +
   geom_hline(#data = plot_me2 %>% filter(Drug2 == "None (Treated)"),
              aes(yintercept = 64.23), linetype =2) +
   scale_fill_manual(values = c("OVA" = "white",
                                 "LSG+OVA" = "#F68064")) +
   scale_alpha_manual(values = c("3" = 0.3, "2" = 0.6, "1" = 1)) +
   facet_wrap(~Drug, scales="free_x", nrow=1) +
-  labs(x = NULL, y = "% Proliferated") +
-  theme(axis.text.x =element_text(angle =45,hjust =1)) +
+  labs(x = NULL, y = "% Live") +
+  theme(axis.text.x =element_text(angle =45,hjust =1),
+        strip.background = element_rect(size=0.35,color="white", fill = "white"),
+        panel.background = element_rect(fill = "white", colour = "black")) +
   guides(alpha = "none" )
 
 
-save_plot(path(output_dir, "PROLIFERATION_all_drugs_barplot_v2.pdf"), p,
+save_plot(path(output_dir, "MMCA_Live.pdf"), p,
           base_aspect_ratio = 3)
 
 stat_compare_means(mapping = aes(x = Drug2, y = Proliferated),
