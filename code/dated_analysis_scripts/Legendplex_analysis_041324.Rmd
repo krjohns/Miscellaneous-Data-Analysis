@@ -69,21 +69,23 @@ plot_me2 = plot_me %>%
           mutate(#factor treatment for correct ordering
                  Treatment = gsub("LPS", "Lipopolysaccharide", 
                                   gsub("control", "Control", gsub("LSG", "L-S-G", Treatment))),
-                 Treatment = factor(Treatment, levels = c("Control","Lipopolysaccharide", "L-S-G")), 
-                 Perturbation = gsub("sgCTR", "sgSCR2", gsub("sgSCR", "sgSCR1", Perturbation)),
+                 Treatment = factor(Treatment, 
+                                    levels = c("Control","Lipopolysaccharide", "L-S-G")), 
+                 Perturbation = gsub("sgCTR", "Ctrl", gsub("sgSCR", "sgSCR1", Perturbation)),
+                 Perturbation = gsub("Glu-CTC-1.1", "Glu-CTC", 
+                                     gsub("Glu-TTC-1.3", "Glu-TTC 1",
+                                     gsub("Glu-TTC-2.1", "Glu-TTC 2", Perturbation))),
                  Perturbation = factor(Perturbation, 
-                                       levels =c ("sgSCR1", "sgSCR2", "Glu-CTC-1.1", "Glu-TTC-1.3", "Glu-TTC-2.1"))) %>%
+                                levels =c ("sgSCR1", "Ctrl", "Glu-CTC",
+                                           "Glu-TTC 1", "Glu-TTC 2"))) %>%
           mutate(plot = ifelse(Treatment != "L-S-G", "L", "L-S-G"))
 
-#artificially add controls to LSG so can facet by treatment
-#plot_me3 = plot_me2 %>%
-           #rbind(plot_me2 %>% filter(Treatment == "Control") %>% mutate(plot = "L-S-G"))
-#causing R studio to quit when i try to plot...? give up for now
+
 
 cytokines = unique(plot_me$Cytokine) %>% sort()
 h2_list = c("IFNb", "IL10", "IL23","IL12p70","IL1a","IL6", "MCP1", "TNFa")
 int_list = c("IFNg", "IL10", "IL23","IL27","IL12p70","IL1a", "IL1b","IL6", "MCP1", "TNFa")
-int_list = c("IL27","IL12p70","IL1a", "IL1b","IL6")
+int_list = c("IL12p70","IL1a", "IL1b","IL6")
 
 final_figs_LSG = plot_me2 %>% 
              filter(Time != "2h") %>%
@@ -93,12 +95,12 @@ final_figs_LSG = plot_me2 %>%
                          !(Cytokine %in% c("IL6", "TNFa")))|
                       (dilution == T &
                          (Cytokine %in% c("IL6", "TNFa")))) %>%
-              mutate(Plasmid = ifelse(grepl("sgSCR", Perturbation),"scr","glu-OE"),
+              mutate(Plasmid = ifelse(grepl("sgSCR|Ctrl", Perturbation),"scr","glu-OE"),
                      Plasmid = factor(Plasmid, levels = c("scr","glu-OE")),
                      Perturbation = gsub("SCR2","SCR", Perturbation),
                      Perturbation = factor(Perturbation,
-                                           levels = c("sgSCR", "Glu-CTC-1.1", 
-                                                      "Glu-TTC-1.3", "Glu-TTC-2.1")))
+                                           levels = c("Ctrl", "Glu-CTC", 
+                                                      "Glu-TTC 1", "Glu-TTC 2")))
 
 
 final_figs_L = plot_me2 %>% 
@@ -130,15 +132,16 @@ p<-ggplot(final_figs_LSG,
                                "Lipopolysaccharide" = "#8C9FCA", 
                                "L-S-G" = "#F68064")) +
   scale_alpha_manual(values = c(0.3,1)) +
-  labs(y = "Concentration (pg/mL)", x = NULL) +
+  labs(y = "pg/mL", x = NULL) +
   facet_wrap(~Cytokine, scales = "free_y", nrow =1 ) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = "bottom",
-        text = element_text(size = 20))
+        legend.position = "none",
+        text = element_text(size = 20),
+        panel.background = element_rect(fill = "white", colour = "black"),)
              
 
 
-save_plot(path(output_dir, "20240411/interesting_short_LSG.pdf"), p, dpi = 90, base_aspect_ratio = 3)
+save_plot(path(output_dir, "20240411/MMCA_slides.pdf"), p, dpi = 90, base_aspect_ratio = 3)
 p
 ```
 
