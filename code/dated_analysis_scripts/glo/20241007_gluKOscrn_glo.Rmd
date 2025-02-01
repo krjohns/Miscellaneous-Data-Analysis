@@ -1,0 +1,209 @@
+---
+title: "Glu Metabolism KO Screen Intracellular Glu Analysis"
+author: "Kate Johnson"
+date: "2024-07-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# libraries ----
+```{r}
+library(tidyverse)
+library(fs)
+library(cowplot)
+library(ggpubr) # for stats
+library(circlize) #for colorRamp2
+```
+#set theme
+```{r}
+# Plot settings ----
+#compress PDFs
+tools::compactPDF('mypdfs/',  gs_quality='screen')
+###PLOTTING THEME ###
+theme_update(text = element_text(size = rel(4)),
+             legend.title = element_text(size = rel(2.5)),
+             legend.key.size = unit(.1, 'inches'),
+             legend.text = element_text(size = rel(2)),
+             panel.background = element_rect(fill = "white",
+                                             colour = "black"),
+             axis.line = element_blank(),
+             plot.title = element_text(size = rel(3), 
+                                       face= "bold", hjust=0.5),
+             plot.margin = unit(c(0.08, 0.1, 0.01, 0.05), "inches"),
+             strip.background = element_rect(linewidth=0.35, color="black"),
+             legend.key = element_rect(colour = NA, fill = NA)) #trbl
+```
+
+# directories ----
+```{r}
+wd = getwd()
+input_dir = fs::path(wd, "../../../input/data")
+output_dir = fs::path(wd, "../../../output/2024/2024_10/20241007/GluKOScrn/Glo_data")
+```
+
+# load data ----
+```{r}
+dat = read_csv(path(input_dir, "2024/2024_10/20241007_glo/20241007_gluKOscrn_glo_data.csv")) 
+platemap = read_csv(path(input_dir, "2024/2024_10/20241007_glo/20241007_gluKOscrn_platemap.csv"))
+```
+#format data
+```{r}
+#pivot_longer
+dat_pivot = dat %>%
+            pivot_longer(cols=-Row, 
+                         names_to = "Plate_Column", 
+                         values_to = "Luminesence") %>%
+            #drop 0 values (no sample present)
+            filter(Luminesence != 0 & Plate_Column != "Plate2_02") %>%
+            #assign std v. test well
+            separate(Plate_Column, 
+                     into = c("Plate", "Column"), 
+                     sep = "_", remove = F) %>%
+            mutate(Std = ifelse(Column %in% c("01","02"), T, F),
+                   Std_rep = ifelse(Std & Plate == "Plate1" & 
+                                      Column == "01", 1,
+                              ifelse(Std & Plate == "Plate2", 2,
+                                 ifelse(Std & Plate == "Plate3", 3,
+                                      ifelse(!Std, NA, 1))))) %>%
+            #adjust column numbers for test wells to match platemap 
+            #(+2 columns to account for std curves in col 1-2)
+            mutate(Column = as.numeric(Column),
+                   Column = ifelse(!Std, Column - 2, Column),
+                   Plate_Row_Column = str_c(Plate, "_",
+                              Row, "_", as.character(Column)),
+                   .before=1) %>%
+  dplyr::select(-c(Plate, Row, Column, Plate_Column))
+```
+
+#merge with platemap/metadata
+```{r}
+#format platemap data
+meta = platemap %>%
+       separate(KO_well, into = c("Row", "Column"), sep = 1) %>%
+       mutate(Plate_Row_Column = str_c("Plate", KO_scrn_plate, "_",
+                      Row, "_", as.character(as.numeric(Column)))) %>%
+       dplyr::select(-c(Row, Column))
+#pull out stds
+stds = dat_pivot %>%
+       filter(Std)
+
+#merge data with platemap to map target names/replicates
+dat_merge = dat_pivot %>%
+            filter(!Std) %>%
+            dplyr::select(-c(Std, Std_rep)) %>%
+            full_join(meta, by = "Plate_Row_Column")
+```
+
+#calculate standard curve
+```{r}
+#add glutamate concentration to stds df
+Glutamate = c("A" = 50,	"B" = 25,	"C" = 12.5,	"D" = 6.25,	
+              "E" = 3.125,	"F" = 1.5625,	"G" = 0.78125, "H" = 0)
+plot_me = stds %>%
+          mutate(`Glutamate (uM)` = gsub(".*_", "", 
+                                    gsub("_[0-9]+$", "", Plate_Row_Column)),
+                 `Glutamate (uM)` = as.numeric(plyr::mapvalues(`Glutamate (uM)`, 
+                                    from = names(Glutamate), 
+                                    to = Glutamate)),
+                  Std_rep = as.character(Std_rep)) %>%
+          filter(`Glutamate (uM)` != 50)
+
+p<-ggplot(plot_me, aes(x = `Glutamate (uM)`, 
+                    y = Luminesence, 
+                    color = Std_rep)) +
+    geom_point() +
+    geom_smooth(aes(group =Std_rep, 
+                    color = as.character(Std_rep)), method = "lm", 
+                se = F,linetype = 1, 
+                linewidth = 0.4) +
+    scale_color_manual(values =c("1"="grey80", "2"="grey50",
+                                 "3"= "grey20","4"= "grey20")) +
+    stat_regline_equation(aes(label =  paste(..eq.label.., 
+                                             ..rr.label.., 
+                                             sep = "~~~~"), group = Std_rep), 
+                  size = rel(3.5), show.legend = F)  +
+    geom_smooth(data = plot_me, method = "lm", 
+                se = F,linetype = 1, color = "blue",
+                linewidth = 0.4) +
+    stat_regline_equation(data = plot_me, aes(label = paste(..eq.label.., 
+                                             ..rr.label.., 
+                                             sep = "~~~~")), 
+                  color = "blue",
+                  size = rel(3.5), 
+                  label.y = 1950,
+                  show.legend = F) +
+        labs(y="RLU", title = "Glutamate Standard Curve")
+
+save_plot(path(output_dir, "Glutamate_std_curve.pdf"), p, base_aspect_ratio = 1.5)
+p
+```
+
+#calculate glu levels using standard curve
+```{r}
+ms = c("1" = 110, "2" = 100, "3" = 91, "4" =100)
+bs = c("1"= 46,"2"=44,"3"=38,"4"=41)
+
+#x = (y-b)/m
+dat_merge_calc = dat_merge %>%
+                 mutate(Plate = as.numeric(gsub("Plate", "", 
+                                gsub("_.*", "", Plate_Row_Column))),
+                   Glu_std = (Luminesence - bs[Plate]) /ms[Plate],
+                   Glu_all = (Luminesence - bs[4]) /ms[4],
+                   Target = gsub("-.*", "", Guide)) %>%
+                  filter(!is.na(Guide))
+```
+
+#plot!
+```{r, warning=F}
+
+plot_me = dat_merge_calc %>%
+          mutate(Guide_number = gsub(".*-", "", Guide),
+                 BMDC_regulation = ifelse(Target == "sgCtrl",
+                                          "Control", 
+                                  #fix wrongly input gene
+                         ifelse(Target == "sgGss", "Down", BMDC_regulation)),
+                 BMDC_regulation = factor(str_to_title(BMDC_regulation),
+                                  levels = c("Control", "Up", 
+                                             "None","Down")),
+                 colour = ifelse(BMDC_regulation == "Control", "black",
+                          ifelse(BMDC_regulation == "Up", "red",
+                          ifelse(BMDC_regulation == "Down", "blue",
+                                 "grey")))) %>%
+           mutate(#take out dead wells from data
+                  Glu_std = ifelse(Guide %in% c("sgSlc1a5-2", "sgSlc1a5-4",
+                                      "sgGfpt1-3", "sgGls2-1"), NA, Glu_std),
+                  Glu_all = ifelse(Guide %in% c("sgSlc1a5-2", "sgSlc1a5-4",
+                                      "sgGfpt1-3", "sgGls2-1"), NA, Glu_all)) %>%
+                  group_by(Target, Guide_number, 
+                           BMDC_regulation, Guide, colour) %>%
+                  summarise(Glu_std = mean(Glu_std),
+                            Glu_all = mean(Glu_all)) %>%
+                  filter(Guide_number != 5) %>%
+                  ungroup() %>%
+                  arrange(desc(BMDC_regulation), desc(Target)) %>%
+                  mutate(Target = factor(Target, levels = unique(Target))) 
+
+colours = plot_me %>%
+          select(Target, BMDC_regulation, colour) %>%
+          unique()
+
+controls = plot_me %>% 
+  filter(grepl("sgCtrl", Target)) %>%
+  summarise(avg1 = mean(Glu_std), avg2 = mean(Glu_all))
+
+#heatmap
+ggplot(plot_me, aes(y=Target, x = Guide_number, fill = Glu_all)) +
+        geom_tile() +
+        scale_fill_gradientn(values = scales::rescale(c(2, 9, 10, 11, 20)),
+                             colors = c("blue","white","white","white", "red"),
+         na.value = "grey") +
+        labs(y=NULL, x = "Guide", fill = "Glutamate (uM)") +
+        theme(text = element_text(size=8),
+              axis.text.y = element_text(color = colours$colour)) 
+
+save_plot(path(output_dir, "Screen_platemap_rel_to_plate.pdf"), p, 
+          base_aspect_ratio = 1)  
+```
+

@@ -1,0 +1,123 @@
+---
+title: "Legendplex_analysis_121022"
+author: "Kate Johnson"
+date: "2024-05-31"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# libraries ----
+```{r}
+library(tidyverse)
+library(fs)
+library(cowplot)
+```
+
+# directories ----
+```{r}
+wd = getwd()
+input_dir = fs::path(wd, "../../input/data")
+output_dir = fs::path(wd, "../../output/2024/2024_05")
+```
+
+# load data ----
+```{r}
+dat = read.csv(path(input_dir, "2024/2024_05/20240531_Legendplex_Glu_SPT.csv")) 
+      
+```
+
+
+#format data ---
+```{r}
+df = dat %>%
+     data.frame() %>%
+     filter(sample_type != "Standard" & sample != "none") %>% # drop standard rows
+     select(-c(experiment, well, dilution, sample_type)) %>% # drop dilution,experiment, well column (not needed)
+     rename_all(~gsub("[A-B][0-9]+$", "", gsub("\\.", "", .))) %>% # rename cols to simplify
+     separate(sample, 
+              into =c("Perturbation", "Treatment"), 
+              sep ="_") %>% # separate sample info into multiple columns
+     mutate_all(~gsub("<", "", gsub(">","",.))) %>% # remove < sign from df
+     #add exp col to separate out
+     mutate(Exp = ifelse(grepl("Ctu|SCR$", Perturbation), "Ctu", "Glu")) %>%
+     rename(Replicate = replicate)
+
+
+#average reps and compute se
+plot_me = df %>%
+          pivot_longer(cols = -c(Perturbation, Exp, Treatment,Replicate), 
+                       names_to = "Cytokine", values_to = "Concentration") %>%
+          #dplyr::select(-Name) %>% #drop for pivoting
+          mutate_at(vars(Concentration), ~as.numeric(.)) %>%# make concentrations numeric
+          pivot_wider(names_from = Replicate, values_from = Concentration, names_prefix = "Rep_",) %>%
+          rowwise() %>% # prep for rowwise calcs
+          mutate(avg_conc = mean(c(Rep_1, Rep_2), na.rm=T), # compute average and stdev
+                 stdev = sd(c(Rep_1, Rep_2), na.rm=T),
+                 se = ifelse(grepl("Crop|pLENTI", Perturbation), stdev, stdev/sqrt(2))) 
+```
+
+
+# plotting! ----
+```{r, warning = F}
+#source(path(wd, "4_plotting_fxns.R"))
+#prep factors etc for plotting
+plot_me2 = plot_me %>%
+                #assign type info for coloring in plot
+          mutate(#factor treatment for correct ordering
+                 Treatment = factor(Treatment, levels = c("Control","L", "S",
+                                                          "G", "LS", "LG", "SG", "LSG")), 
+                 
+                 Perturbation = factor(Perturbation, 
+                                       levels =c ("sgSCR-CropSeq", "sgSCR-pLENTI100",
+                                                  "sgSCR", "GluCTC-1.1", 
+                                                  "GluTTC-1.3", "sgCtu1-g1",
+                                                  "sgCtu1-g26", "sgCtu2-g6", "sgCtu2-g31")),
+                 Guide = gsub(".*-", "", Perturbation),
+                 Guide = gsub("g26", "g2",
+                              gsub("g31", "g2",
+                                   gsub("g6", "g1",
+                                        gsub("CropSeq", "g1",
+                                        gsub("pLENTI100", "g2",
+                                        gsub("sgSCR", "g1", Guide)))))),
+                 Guide = factor(Guide, levels = c("1.1", "1.3", "g1", "g2"))) 
+
+#artificially add controls
+
+cytokines = unique(plot_me$Cytokine) %>% sort()
+int_list = c("IFNg", "IL10", "IL23","IL27","IL12p70","IL1a", "IL1b","IL6", "MCP1", "TNFa")
+int_list = c("IL27","IL12p70","IL1a", "IL1b","IL6")
+
+
+p<-ggplot(plot_me2 %>% filter(!(grepl("Ctu|pLENTI|SCR$", Perturbation)) & 
+                                Cytokine %in% cytokines[1:4]
+                          ),
+          aes(x = Perturbation, y = avg_conc, fill = Treatment, alpha = Guide)) +
+  geom_col(stat = "identity", position = position_dodge(0.9),
+           color = "black") +
+  geom_errorbar(mapping =aes(ymin= avg_conc - se, ymax= avg_conc + se), 
+                          width=0.4, 
+                          position = position_dodge(0.9), 
+                          stat = "identity", 
+                          colour="black", alpha=0.9, size=0.5) +
+  scale_fill_manual(values = c(Control = "grey40", 
+                               L = "#B9CEE6",S = "#8C9FCA", G = "#707FA1",
+                               LS = "#68C3A5" ,LG = "#539C84" , SG = "#3E7563",
+                               LSG = "#F68064" )) +
+  scale_alpha_manual(values = c(0.8, 0.6, 1,1)) +
+  labs(y = "Concentration (pg/mL)", x = NULL) +
+  facet_grid(Cytokine~Treatment, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none",
+        text = element_text(size = 10)) +
+  guides(fill = guide_legend(nrow=1))
+             
+
+
+save_plot(path(output_dir, "20240530/Glu_Ctu_SPT/Glu/plate_controls/all_treatments_1.pdf"), 
+          p, dpi = 90, base_aspect_ratio = 1.8)
+p
+```
+

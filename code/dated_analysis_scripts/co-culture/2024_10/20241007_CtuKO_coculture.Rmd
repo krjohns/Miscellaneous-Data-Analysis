@@ -1,0 +1,241 @@
+---
+title: "CtuKO_coculture_L-glu_test2"
+author: "Kate Johnson"
+date: "2024-10-07"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# libraries ----
+```{r}
+library(tidyverse)
+library(fs)
+library(cowplot)
+library(ggpubr) # for stats
+library(readxl)
+```
+
+# directories ----
+```{r}
+wd = getwd()
+input_dir = fs::path(wd, "../../../../input/data")
+output_dir = fs::path(wd, "../../../../output/2024/2024_10/20241007/CtuKO_coculture")
+```
+
+# load data ----
+```{r}
+dat = read_xlsx(path(input_dir, "2024/2024_10/20241007_CtuKO_L-glu_test2_coculture.xlsx")) 
+```
+
+CTUko
+#bar plots-opt exp------------
+```{r}
+plot_me = dat %>%
+          select(-Sample) %>%
+          filter(Experiment == "CtuKO") %>%
+          group_by(Target, Treatment #Drug, Concentration
+                   ) %>%
+          mutate(n_live = n(),
+                 avg_live = mean(Live),
+                 se_live = sd(Live)/sqrt(n_live),
+                 avg_prolif = mean(Proliferated),
+                 n_prolif = n(),
+                 se_prolif = sd(Proliferated)/sqrt(n_prolif)) %>%
+          ungroup() %>%
+          mutate(Treatment = factor(Treatment, levels = c("OVA", "L", "LSG")),
+                 Target = factor(Target, levels = c("sgScr", "sgCtu1", "sgCtu2"))
+                 ) %>%
+          arrange(Treatment, Target) %>%
+          mutate(Sample = Target,
+                 Guide = NULL)
+
+plot_me = plot_me %>% 
+          mutate(
+                 Sample = factor(Sample, levels = unique(Sample))) %>%
+          unique()
+
+means1 = plot_me %>% 
+         filter(Target != "sgScr") %>%
+         select(Sample, Treatment, Target, #Drug, Concentration,
+               avg_live, se_live, avg_prolif, se_prolif) %>% 
+         unique()
+means = plot_me %>%
+        filter(Target == "sgScr") %>%
+        group_by(Target, Treatment) %>%
+        mutate(n_live = n(),
+                 avg_live = mean(Live),
+                 se_live = sd(Live)/sqrt(n_live),
+                 avg_prolif = mean(Proliferated),
+                 n_prolif = n(),
+                 se_prolif = sd(Proliferated)/sqrt(n_prolif)) %>%
+         select(Sample, Treatment, Target, #Drug, Concentration,
+               avg_live, se_live, avg_prolif, se_prolif) %>% 
+         unique() %>%
+         rbind(means1)
+
+#plot
+p<-ggplot(plot_me, 
+       aes(x = Sample,
+           y = Proliferated,
+           fill = Treatment)) +
+  geom_col(data = means,
+           aes(y = avg_prolif), 
+            color = "black") +
+  geom_point(size = 1) +
+  geom_errorbar(data= means,
+                aes(ymin = avg_prolif - se_prolif,
+                    ymax = avg_prolif + se_prolif,
+                    x = Sample, width = 0.5),
+                inherit.aes=F) +
+  #geom_hline(data = means %>% filter(Treatment == "OVA"), 
+          #   aes(yintercept = 18.9), linetype = 2) +
+  scale_fill_manual(values = c("OVA" = "white",
+                                "L" =  "#B9CEE6",
+                                 "S" = "#8C9FCA", 
+                                 "G" = "#707FA1",
+                                "LSG" = "#F68064"))+
+  labs(x = NULL, y = "% OTII Proliferation") +
+  facet_wrap(~Treatment, scales = "free") +
+  theme(axis.text.x =element_text(angle =45,hjust =1),
+        text = element_text(size=16),
+        legend.position = "none") 
+
+p
+save_plot(path(output_dir, "CtuKO/CtuKO_Percent_Proliferated_avg.pdf"), p,
+          base_aspect_ratio = 3)
+
+
+
+p<-ggplot(plot_me, 
+       aes(x = Sample,
+           y = Live,
+           fill = Treatment)) +
+  geom_col(data = means,
+           aes(y = avg_live), , 
+            color = "black") +
+  geom_point(size = 1) +
+  geom_errorbar(data= means,
+                aes(ymin = avg_live - se_live,
+                    ymax = avg_live + se_live, 
+                    x = Sample), width = 0.5,
+                inherit.aes=F) +
+  #geom_hline(data = means %>% filter(Treatment == "OVA"), 
+             #aes(yintercept = 79.2), linetype = 2) +
+  scale_fill_manual(values = c("OVA" = "white",
+                                "L" =  "#B9CEE6",
+                                 "S" = "#8C9FCA", 
+                                 "G" = "#707FA1",
+                                "LSG" = "#F68064"))+
+  labs(x = NULL, y = "% Live OTII Cells") +
+  facet_wrap(~Treatment, scales = "free") +
+  theme(axis.text.x =element_text(angle =45,hjust =1),
+        text = element_text(size=16),
+        legend.position = "none")
+p
+save_plot(path(output_dir, "CtuKO/CtuKO_Percent_Live_avg.pdf"), p,
+          base_aspect_ratio = 3)
+
+```
+
+L-Glu test
+```{r}
+plot_me = dat %>%
+          select(-Sample) %>%
+          filter(Experiment == "L_glu_test2") %>%
+          group_by(Treatment, Drug, Concentration
+                   ) %>%
+          mutate(n_live = n(),
+                 avg_live = mean(Live),
+                 se_live = sd(Live)/sqrt(n_live),
+                 avg_prolif = mean(Proliferated),
+                 n_prolif = n(),
+                 se_prolif = sd(Proliferated)/sqrt(n_prolif)) %>%
+          ungroup() %>%
+          mutate(Treatment = factor(Treatment, levels = c("OVA", "L", "LSG")),
+                 Drug = factor(Drug, levels = c("None","HCl", "L-Glu")),
+                 Concentration = factor(Concentration, levels = c("None", "5uM", "10uM"))) %>%
+          arrange(Drug, Treatment, Concentration) %>%
+          mutate(Sample = str_c(Drug, "_", Treatment))
+
+plot_me = plot_me %>% 
+          mutate(
+                 Sample = factor(Sample, levels = unique(Sample))) %>%
+          unique()
+
+means = plot_me %>% 
+         select(Sample, Treatment, Drug, Concentration,
+               avg_live, se_live, avg_prolif, se_prolif) %>% 
+         unique()
+
+
+#plot
+p<-ggplot(plot_me, 
+       aes(x = Sample,
+           y = Proliferated,
+           fill = Treatment)) +
+  geom_col(data = means,
+           aes(y = avg_prolif), 
+            color = "black") +
+  geom_point(size = 1) +
+  geom_errorbar(data= means,
+                aes(ymin = avg_prolif - se_prolif,
+                    ymax = avg_prolif + se_prolif,
+                    x = Sample, width = 0.5),
+                inherit.aes=F) +
+  geom_hline(data = means %>% filter(Treatment == "OVA"), 
+             aes(yintercept = 84.3), linetype = 2) +
+  geom_hline(data = means %>% filter(Treatment == "OVA"), 
+             aes(yintercept = 69.3), linetype = 2) +
+  geom_hline(data = means %>% filter(Treatment == "OVA"), 
+             aes(yintercept = 13.6), linetype = 2) +
+  scale_fill_manual(values = c("OVA" = "white",
+                                "L" =  "#B9CEE6",
+                                 "S" = "#8C9FCA", 
+                                 "G" = "#707FA1",
+                                "LSG" = "#F68064"))+
+  labs(x = NULL, y = "% OTII Proliferation") +
+  facet_wrap(Drug~Concentration, scales = "free_x", nrow =1) +
+  theme(axis.text.x =element_text(angle =45,hjust =1),
+        text = element_text(size=16),
+        legend.position = "none") 
+
+p
+save_plot(path(output_dir, "L-Glu_test2/L-Glu_Percent_Proliferated_avg.pdf"), p,
+          base_aspect_ratio = 3)
+
+
+
+p<-ggplot(plot_me, 
+       aes(x = Sample,
+           y = Live,
+           fill = Treatment)) +
+  geom_col(data = means,
+           aes(y = avg_live), , 
+            color = "black") +
+  geom_point(size = 1) +
+  geom_errorbar(data= means,
+                aes(ymin = avg_live - se_live,
+                    ymax = avg_live + se_live, 
+                    x = Sample), width = 0.5,
+                inherit.aes=F) +
+  #geom_hline(data = means %>% filter(Treatment == "OVA"), 
+             #aes(yintercept = 79.2), linetype = 2) +
+  scale_fill_manual(values = c("OVA" = "white",
+                                "L" =  "#B9CEE6",
+                                 "S" = "#8C9FCA", 
+                                 "G" = "#707FA1",
+                                "LSG" = "#F68064"))+
+  labs(x = NULL, y = "% Live OTII Cells") +
+  facet_wrap(Drug~Concentration, scales = "free_x", nrow =1) +
+  theme(axis.text.x =element_text(angle =45,hjust =1),
+        text = element_text(size=16),
+        legend.position = "none")
+p
+save_plot(path(output_dir, "L-Glu_test2/L-Glu_Percent_Live_avg.pdf"), p,
+          base_aspect_ratio = 3)
+
+```
+
+

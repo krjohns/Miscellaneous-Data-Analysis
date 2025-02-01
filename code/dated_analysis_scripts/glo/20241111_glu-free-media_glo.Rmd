@@ -1,0 +1,294 @@
+---
+title: "Glu Metabolism KO Screen Intracellular Glu Analysis"
+author: "Kate Johnson"
+date: "2024-07-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# libraries ----
+```{r}
+library(tidyverse)
+library(fs)
+library(cowplot)
+library(ggpubr) # for stats
+library(circlize) #for colorRamp2
+library(RcppGSL) # colNorm() function
+library(ComplexHeatmap)
+```
+#set theme
+```{r}
+# Plot settings ----
+#compress PDFs
+tools::compactPDF('mypdfs/',  gs_quality='screen')
+###PLOTTING THEME ###
+theme_update(#text = element_text(size = rel(3)),
+             legend.title = element_text(size = rel(0.8)),
+             legend.key.size = unit(.09, 'inches'),
+             legend.text = element_text(size = rel(0.8)),
+             panel.background = element_rect(fill = "white",
+                                             colour = "black"),
+             axis.line = element_blank(),
+             plot.title = element_text(size = rel(1), 
+                                      face= "bold", hjust=0.5),
+             plot.margin = unit(c(0.08, 0.1, 0.01, 0.05), "inches"),
+             strip.background = element_rect(linewidth=0.35, color="black"),
+             legend.key = element_rect(colour = NA, fill = NA)) #trbl
+```
+
+# directories ----
+```{r}
+wd = getwd()
+input_dir = fs::path(wd, "../../../input/data")
+output_dir = fs::path(wd, "../../../output/2024/2024_11/20241111/Glu-free_media/Glo_data")
+```
+
+#functions-----
+```{r}
+do_plot = function(file_name, w, h, p) {
+  pdf(file=fs::path(output_dir, file_name), width = w, height = h)
+      draw(p)
+      dev.off()
+}
+```
+
+# load data ----
+```{r}
+dat = read_csv(path(input_dir, "2024/2024_11/20241111_glo/20241111_glo_data.csv")) 
+platemap = read_csv(path(input_dir, "2024/2024_11/20241111_glo/20241111_glo_platemap.csv"))
+cocult_dat = read_csv(path(input_dir,
+                           "2024/2024_11/20241111_coculture/20241111_glu_free_coculture.csv"))
+```
+#format data
+```{r}
+#pivot_longer
+dat_pivot = dat %>%
+            pivot_longer(cols=-Row, 
+                         names_to = "Plate_Column", 
+                         values_to = "Luminescence") %>%
+            #drop 0 values (no sample present)
+            #filter(Luminesence != 0 & Plate_Column != "Plate2_02") %>%
+            filter(!(is.na(Luminescence))) %>%
+            #assign std v. test well
+            separate(Plate_Column, 
+                     into = c("Plate", "Column"), 
+                     sep = "_", remove = F) %>%
+            mutate(Plate_Row_Column = str_c(Plate, "_",Row, "_",Column)) %>%
+            dplyr::select(-c(Plate, Row, Column, Plate_Column))
+```
+
+#merge with platemap/metadata
+```{r}
+#format platemap data
+meta = platemap %>%
+       pivot_longer(cols=-Row, 
+                         names_to = "Plate_Column", 
+                         values_to = "Sample") %>%
+            #drop 0 values (no sample present)
+            #filter(Luminesence != 0 & Plate_Column != "Plate2_02") %>%
+            filter(!(is.na(Sample))) %>%
+            #assign std v. test well
+            separate(Plate_Column, 
+                     into = c("Plate", "Column"), 
+                     sep = "_", remove = F) %>%
+            mutate(Plate_Row_Column = str_c(Plate, "_",Row, "_",Column)) %>%
+            dplyr::select(-c(Plate, Row, Column, Plate_Column))
+
+#merge data with platemap to map target names/replicates
+dat_merge = dat_pivot %>%
+            full_join(meta, by = "Plate_Row_Column")
+
+#pull out stds
+stds = dat_merge %>%
+       filter(grepl("Std", Sample))
+```
+
+#calculate standard curve
+```{r}
+
+plot_me = stds %>%
+          mutate(`Glutamate (uM)` = as.numeric(gsub("uM", "", gsub(".*_", "", Sample)))) %>%
+          filter(`Glutamate (uM)` != 50)
+
+p<-ggplot(plot_me, aes(x = `Glutamate (uM)`, 
+                    y = Luminescence)) +
+    geom_point() +
+    geom_smooth(method = "lm", 
+                se = F,linetype = 1, 
+                linewidth = 0.4) +
+    stat_regline_equation(aes(label = paste(..eq.label.., 
+                                             ..rr.label.., 
+                                             sep = "~~~~")), 
+                  size = rel(3.5), show.legend = F)  +
+        labs(y="RLU", title = "Glutamate Standard Curve")
+
+save_plot(path(output_dir, "Glutamate_std_curve_25uM-Max.pdf"), p, base_aspect_ratio = 1.5)
+p
+```
+
+#calculate glu levels using standard curve
+```{r}
+m = 95
+b = 34
+
+#x = (y-b)/m
+dat_merge_calc = dat_merge %>%
+                 filter(!grepl("Std", Sample)) %>%
+                 mutate(`Glutamate (uM)` = (Luminescence - b)/m) %>%
+                 separate(Sample, 
+                          into = c("Cell_type", "Time", "Assay",
+                                   "Media_type","Treatment"), sep = "_" ,remove = F) %>%
+                 mutate(Assay = str_c(Assay, "cellular"),
+                        `Glutamate (uM)` = ifelse(Assay == "Extracellular",
+                                                  `Glutamate (uM)` * 50, `Glutamate (uM)`),
+                        Media_type = ifelse(Media_type == "Depleted",
+                                            "Glutamate-Depleted Media", "Full Media"),
+                        Culture_type = ifelse(Time == "8h", "Mono-culture", "Co-culture"))
+```
+
+#plot!
+#barplots
+```{r}
+
+plot_me = dat_merge_calc %>% 
+          filter(Time == "8h") %>%
+          mutate(Treatment = ifelse(Cell_type== "NoCells", "No Cells", Treatment),
+                 Treatment = factor(Treatment, levels = c("No Cells","None", "L", "LSG")),
+                 Assay = factor(Assay, levels = c("Intracellular", "Extracellular")),
+                 Cell_type = factor(Cell_type, levels = c("NoCells", "BMDC",
+                                                          "TCell", "BMDC-Tcell")),
+                 Media_type = factor(Media_type,
+                                     levels = c("Glutamate-Depleted Media",
+                                                "Full Media"))) %>%
+          arrange(Assay, Cell_type, Media_type, Treatment) 
+
+means = plot_me %>% 
+        group_by(Sample, Treatment, Media_type, Assay, Culture_type, Time) %>%
+        summarise(mean = mean(`Glutamate (uM)`, na.rm=T),
+                  n = n(),
+                  se = sd(`Glutamate (uM)`)/sqrt(n))
+
+
+p<-ggplot(plot_me, aes(x = Treatment, y = `Glutamate (uM)`, 
+                    fill = Treatment)) +
+  geom_col(data = means, aes(x = Treatment, y = mean, alpha = Media_type), 
+           position = position_dodge2(width = 1.5, preserve = "single"),color = "black") +
+  geom_point(color = "black", show.legend = F, position = position_dodge2(width=0.5, preserve = "single")) +
+  geom_errorbar(data = means, aes(x = Treatment, ymin = mean-se, ymax = mean+se),
+                width = 0.5, position = position_dodge2(width = 1.5,  preserve = "single"),
+                inherit.aes = F) +
+  scale_alpha_manual(values=c(0.5,1)) +
+  scale_fill_manual(values = c("No Cells" = "grey93",
+                                "None" = "grey30",
+                                "L" = "#B9CEE6",
+                                "LSG" = "#F68064")) +
+  ggh4x::facet_grid2(Media_type~Assay, independent = "y",scales = "free") +
+  labs(x = NULL) +
+  theme(axis.text.x = element_text(angle = 45, hjust =1),
+        text =element_text(size = 10))
+
+
+save_plot(path(output_dir, "BMDC_8h.pdf"), p, base_aspect_ratio = 1.5)      
+
+```
+
+#plot!
+#co-culture
+```{r}
+
+plot_me = dat_merge_calc %>% 
+          filter(Time == "72h") %>%
+          #remove outliers
+          filter(!(Plate_Row_Column %in% c("Plate1_B_11", "Plate1_D_11", "Plate1_H_11"))) %>%
+          mutate(Treatment = ifelse(Cell_type== "NoCells", "No Cells", Treatment),
+                 Treatment = factor(Treatment, levels = c("No Cells","None","OVA",
+                                                          "L", "LSG")),
+                 Assay = ifelse(Assay == "Intracellular", 
+                                str_c(Assay, " (", Cell_type, "s)"),
+                                "Extracellular (DC-T Sup)"),
+                 Assay = factor(Assay, levels = c("Intracellular (BMDCs)",
+                                                  "Intracellular (Tcells)", 
+                                                  "Extracellular (DC-T Sup)")),
+                 Cell_type = factor(Cell_type, levels = c("NoCells", "BMDC",
+                                                          "TCell", "BMDC-Tcell")),
+                 Media_type = factor(Media_type,
+                                     levels = c("Glutamate-Depleted Media",
+                                                "Full Media"))) %>%
+          arrange(Assay, Cell_type, Media_type, Treatment) 
+
+means = plot_me %>% 
+        group_by(Sample, Treatment, Media_type, Assay, Culture_type, Time) %>%
+        summarise(mean = mean(`Glutamate (uM)`, na.rm=T),
+                  n = n(),
+                  se = sd(`Glutamate (uM)`)/sqrt(n))
+
+
+p<-ggplot(plot_me, aes(x = Treatment, y = `Glutamate (uM)`, 
+                    fill = Treatment)) +
+  geom_col(data = means, aes(x = Treatment, y = mean, alpha = Media_type), 
+           position = position_dodge2(width = 1.5, preserve = "single"),color = "black") +
+  geom_point(color = "black", show.legend = F, position = position_dodge2(width=0.5, preserve = "single")) +
+  geom_errorbar(data = means, aes(x = Treatment, ymin = mean-se, ymax = mean+se),
+                width = 0.5, position = position_dodge2(width = 1.5,  preserve = "single"),
+                inherit.aes = F) +
+  scale_alpha_manual(values=c(0.5,1)) +
+  scale_fill_manual(values = c("No Cells" = "grey93",
+                                "OVA" = "grey30",
+                                "L" = "#B9CEE6",
+                                "LSG" = "#F68064")) +
+  ggh4x::facet_grid2(Media_type~Assay, independent = "y",scales = "free") +
+  labs(x = NULL) +
+  theme(axis.text.x = element_text(angle = 45, hjust =1),
+        text =element_text(size = 10))
+
+
+save_plot(path(output_dir, "DC-T_72h.pdf"), p, base_aspect_ratio = 2)      
+
+```
+
+
+#co-culture data
+```{r}
+plot_me_co = cocult_dat %>%
+             filter(Exp == "glu-free-media") %>%
+             mutate(Treatment = factor(Treatment, levels = c("OVA", "L", "LSG")),
+                    Media_type = factor(str_c(Media_type, " Media"), 
+                                        levels = c("Full Media", "Glu-Depleted Media")))
+
+means_co = plot_me_co %>%
+           select(-c(Sample, Replicate, Exp)) %>%
+           group_by(Treatment, Media_type, BMDC_num, T_num) %>%
+           summarise(mean_live = mean(Live, na.rm=T),
+                     n = n(),
+                     se_live = sd(Live)/sqrt(n),
+                     mean_prolif = mean(Proliferated, na.rm=T),
+                     se_prolif = sd(Proliferated)/sqrt(n))
+
+#proliferation
+p<-ggplot(plot_me_co, aes(x = Treatment, y = Proliferated, 
+                    fill = Treatment)) +
+  geom_col(data = means_co, aes(x = Treatment, y = mean_prolif, alpha = Media_type), 
+           position = position_dodge2(width = 1.5, preserve = "single"),color = "black") +
+  geom_point(color = "black", show.legend = F,
+             position = position_dodge2(width=0.5,
+                                       preserve = "single")) +
+  geom_errorbar(data = means_co, aes(x = Treatment,
+                                  ymin = mean_prolif-se_prolif, 
+                                  ymax = mean_prolif+se_prolif),
+                width = 0.5, position = position_dodge2(width = 1.5,  preserve = "single"),
+                inherit.aes = F) +
+  scale_alpha_manual(values=c(1, 0.5)) +
+  scale_fill_manual(values = c("No Cells" = "grey93",
+                                "OVA" = "grey30",
+                                "L" = "#B9CEE6",
+                                "LSG" = "#F68064")) +
+  facet_wrap(~Media_type, scales = "fixed") +
+  labs(x = NULL, y = "%OTII Proliferation") +
+  theme(axis.text.x = element_text(angle = 45, hjust =1),
+        text =element_text(size = 14))
+
+save_plot(path(output_dir, "../Co-culture/DC-T_coculture_prolif_fixed_scale.pdf"), p, base_aspect_ratio = 2)
+```
+

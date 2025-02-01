@@ -1,0 +1,147 @@
+---
+title: "Legendplex_analysis_121022"
+author: "Kate Johnson"
+date: "2022-12-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# libraries ----
+```{r}
+library(tidyverse)
+library(fs)
+library(cowplot)
+```
+
+# directories ----
+```{r}
+wd = getwd()
+input_dir = fs::path(wd, "../../input/data")
+output_dir = fs::path(wd, "../../output/2024/2024_04")
+```
+
+# load data ----
+```{r}
+dat = read.csv(path(input_dir, "2024/2024_04/20240411_legendplex_gluOE_Exp2.csv")) 
+      
+```
+
+
+#format data ---
+```{r}
+df = dat %>%
+     data.frame() %>%
+     filter(sample_type != "Standard" & sample != "none") %>% # drop standard rows
+     select(-c(experiment, well, dilution, sample_type)) %>% # drop dilution,experiment, well column (not needed)
+     rename_all(~gsub("[A-B][0-9]+$", "", gsub("\\.", "", .))) %>% # rename cols to simplify
+     mutate(dilution = grepl("diluted", sample), .after =1) %>%
+     mutate(sample = gsub("_diluted", "", sample)) %>%
+     separate(sample, 
+              into =c("Perturbation", "Treatment", "Time"), 
+              sep ="_") %>% # separate sample info into multiple columns
+     mutate_all(~gsub("<", "", gsub(">","",.))) %>% # remove < sign from df
+     rename(Replicate = replicate)
+
+
+#average reps and compute se
+plot_me = df %>%
+          pivot_longer(cols = -c(Perturbation, dilution, Treatment, Time, Replicate), 
+                       names_to = "Cytokine", values_to = "Concentration") %>%
+          #dplyr::select(-Name) %>% #drop for pivoting
+          mutate_at(vars(Concentration), ~as.numeric(.)) %>%# make concentrations numeric
+          pivot_wider(names_from = Replicate, values_from = Concentration, names_prefix = "Rep_",) %>%
+          rowwise() %>% # prep for rowwise calcs
+          mutate(avg_conc = mean(c(Rep_1, Rep_2, Rep_3), na.rm=T), # compute average and stdev
+                 stdev = sd(c(Rep_1, Rep_2, Rep_3), na.rm=T),
+                 se = ifelse(grepl("sg", Perturbation), stdev/sqrt(2), stdev/sqrt(3))) 
+```
+
+
+# plotting! ----
+```{r, warning = F}
+#source(path(wd, "4_plotting_fxns.R"))
+#prep factors etc for plotting
+plot_me2 = plot_me %>%
+                #assign type info for coloring in plot
+          mutate(#factor treatment for correct ordering
+                 Treatment = gsub("LPS", "Lipopolysaccharide", 
+                                  gsub("control", "Control", gsub("LSG", "L-S-G", Treatment))),
+                 Treatment = factor(Treatment, 
+                                    levels = c("Control","Lipopolysaccharide", "L-S-G")), 
+                 Perturbation = gsub("sgCTR", "Ctrl", gsub("sgSCR", "sgSCR1", Perturbation)),
+                 Perturbation = gsub("Glu-CTC-1.1", "Glu-CTC", 
+                                     gsub("Glu-TTC-1.3", "Glu-TTC 1",
+                                     gsub("Glu-TTC-2.1", "Glu-TTC 2", Perturbation))),
+                 Perturbation = factor(Perturbation, 
+                                levels =c ("sgSCR1", "Ctrl", "Glu-CTC",
+                                           "Glu-TTC 1", "Glu-TTC 2"))) %>%
+          mutate(plot = ifelse(Treatment != "L-S-G", "L", "L-S-G"))
+
+
+
+cytokines = unique(plot_me$Cytokine) %>% sort()
+h2_list = c("IFNb", "IL10", "IL23","IL12p70","IL1a","IL6", "MCP1", "TNFa")
+int_list = c("IFNg", "IL10", "IL23","IL27","IL12p70","IL1a", "IL1b","IL6", "MCP1", "TNFa")
+int_list = c("IL12p70","IL1a", "IL1b","IL6")
+
+final_figs_LSG = plot_me2 %>% 
+             filter(Time != "2h") %>%
+             filter(Cytokine %in% int_list) %>%
+             filter(Perturbation != "sgSCR1" & Treatment != "Lipopolysaccharide") %>%
+             filter((dilution == F & 
+                         !(Cytokine %in% c("IL6", "TNFa")))|
+                      (dilution == T &
+                         (Cytokine %in% c("IL6", "TNFa")))) %>%
+              mutate(Plasmid = ifelse(grepl("sgSCR|Ctrl", Perturbation),"scr","glu-OE"),
+                     Plasmid = factor(Plasmid, levels = c("scr","glu-OE")),
+                     Perturbation = gsub("SCR2","SCR", Perturbation),
+                     Perturbation = factor(Perturbation,
+                                           levels = c("Ctrl", "Glu-CTC", 
+                                                      "Glu-TTC 1", "Glu-TTC 2")))
+
+
+final_figs_L = plot_me2 %>% 
+             filter(Time != "2h") %>%
+             filter(Cytokine %in% int_list) %>%
+             filter(Perturbation != "sgSCR1" & Treatment != "L-S-G") %>%
+             filter((dilution == T & 
+                      !(Cytokine %in% c("IL10", "IL1b", "MCP1"))) |
+                    (dilution == F & 
+                       (Cytokine %in% c("IL10", "IL1b", "MCP1")))) %>%
+              mutate(Plasmid = ifelse(grepl("sgSCR", Perturbation),"scr","glu-OE"),
+                     Plasmid = factor(Plasmid, levels = c("scr","glu-OE")),
+                     Perturbation = gsub("SCR2","SCR", Perturbation),
+                     Perturbation = factor(Perturbation,
+                                           levels = c("sgSCR", "Glu-CTC-1.1", 
+                                                      "Glu-TTC-1.3", "Glu-TTC-2.1")))
+
+
+p<-ggplot(final_figs_LSG,
+          aes(x = Perturbation, y = avg_conc, fill = Treatment, alpha = Plasmid)) +
+  geom_col(stat = "identity", position = position_dodge(0.9),
+           color = "black") +
+  geom_errorbar(mapping =aes(ymin= avg_conc - se, ymax= avg_conc + se), 
+                          width=0.4, 
+                          position = position_dodge(0.9), 
+                          stat = "identity", 
+                          colour="black", alpha=0.9, size=0.5) +
+  scale_fill_manual(values = c("Control" ="black", 
+                               "Lipopolysaccharide" = "#8C9FCA", 
+                               "L-S-G" = "#F68064")) +
+  scale_alpha_manual(values = c(0.3,1)) +
+  labs(y = "pg/mL", x = NULL) +
+  facet_wrap(~Cytokine, scales = "free_y", nrow =1 ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none",
+        text = element_text(size = 20),
+        panel.background = element_rect(fill = "white", colour = "black"),)
+             
+
+
+save_plot(path(output_dir, "20240411/MMCA_slides.pdf"), p, dpi = 90, base_aspect_ratio = 3)
+p
+```
+

@@ -1,0 +1,200 @@
+---
+title: "Legendplex_analysis_121022"
+author: "Kate Johnson"
+date: "2022-12-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# libraries ----
+```{r}
+library(tidyverse)
+library(fs)
+library(cowplot)
+```
+
+# directories ----
+```{r}
+wd = getwd()
+input_dir = fs::path(wd, "../../input/data")
+output_dir = fs::path(wd, "../../output/2024/2024_06")
+```
+
+# load data ----
+```{r}
+dat = read.csv(path(input_dir, "2024/2024_06/20240614_sno_virus_panel.csv")) 
+      
+```
+
+
+#format data ---
+```{r}
+df = dat %>%
+     data.frame() %>%
+     #filter out well with no beads
+     filter(well != "Inflammation_C6_Sample112.fcs") %>%
+     filter(sample_type != "Standard" & sample != "empty") %>% # drop standard rows
+     select(-c(experiment, well, dilution, sample_type)) %>% # drop dilution,experiment, well column (not needed)
+     rename_all(~gsub("[A-B][0-9]+$", "", gsub("\\.", "", .))) %>% # rename cols to simplify
+     mutate(pool = grepl("ab", sample)) %>%
+     separate(sample, 
+              into =c("Perturbation", "Treatment", "Cell_type"), 
+              sep ="_",
+              remove = F) %>% # separate sample info into multiple columns
+     mutate_all(~ifelse(is.na(.), "NA", .)) %>%
+     mutate_all(~gsub("<", "", gsub(">","",.))) %>% # remove < sign from df
+     rename(Replicate = replicate)
+
+
+#average reps and compute se
+plot_me = df %>%
+          pivot_longer(cols = -c(Perturbation, Treatment, Cell_type, Replicate, sample, pool), 
+                       names_to = "Cytokine", values_to = "Concentration") %>%
+          #dplyr::select(-Name) %>% #drop for pivoting
+          mutate_at(vars(Concentration), ~as.numeric(.)) %>%# make concentrations numeric
+          pivot_wider(names_from = Replicate, 
+                      values_from = Concentration, names_prefix = "Rep_",) %>%
+          rowwise() %>% # prep for rowwise calcs
+          mutate(avg_conc = mean(c(Rep_1, Rep_2), na.rm=T), # compute average and stdev
+                 stdev = sd(c(Rep_1, Rep_2), na.rm=T),
+                 se =  stdev/sqrt(2)) 
+```
+
+
+# plotting! ----
+```{r, warning = F}
+
+plot_me2 <- plot_me %>% filter(grepl("Ctrl", sample) | grepl("OE", sample)) %>%
+            mutate(
+              Guide = gsub(".*-", "", Perturbation), 
+              Perturbation = gsub("-.*", "", gsub("ab", "ab_pool", Perturbation)),
+              Perturbation = factor(Perturbation,
+              levels = c("sgCtrl", "sg57", "sg73a", "sg73b",
+                         "sg73ab_pool", "Snora57_OE", "Snora73a_OE", 
+                         "Snora73b_OE", "Snora73ab_pool_OE")),
+              Target = ifelse(grepl("Ctrl", sample), "Ctrl",
+                              ifelse(grepl("57", sample), "57",
+                                     ifelse(grepl("73a-|73a_", sample), "73a",
+                                            ifelse(grepl("73b-|73b_", sample), "73b",
+                                                   "73ab_pool")))),
+              Target = factor(Target, 
+                              levels = c("Ctrl", "57", "73a", "73b", "73ab_pool")),
+              sample2 = gsub("_.*", "", sample)) %>%
+             arrange(Target, Perturbation, Guide, Cytokine)
+
+Cytokines = plot_me2 %>% select(Cytokine) %>% unique() %>% unlist()
+plot_me3 = plot_me2 %>% 
+            mutate(sample2 = factor(sample2, levels = unique(plot_me2$sample2)),
+                   Cytokine = factor(Cytokine, levels = Cytokines))
+
+
+p<-ggplot(plot_me3 %>% filter(Cytokine %in% Cytokines[8:13] & Cell_type == "BMDC"),
+          aes(x = sample2, y = avg_conc, fill = Target)) +
+  geom_col(stat = "identity", position = position_dodge(0.9),
+           color = "black") +
+  geom_errorbar(mapping =aes(ymin= avg_conc - se, ymax= avg_conc + se), 
+                          width=0.4, 
+                          position = position_dodge(0.9), 
+                          stat = "identity", 
+                          colour="black", alpha=0.9, size=0.5) +
+  scale_fill_manual(values = c("Ctrl" ="white",
+                               "57" = "#7CAE00", 
+                               "73a" = "#00BFC4",
+                                "73b" = "#F8766D", 
+                                  "73ab_pool" = "#C77CFF")) +
+  #scale_alpha_manual(values = c(0.3,1)) +
+  labs(y = "Concentration (pg/mL)", x = NULL) +
+  ggh4x::facet_grid2(Treatment~Cytokine, independent = "y", scales = "free") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "bottom",
+        text = element_text(size = 12))
+             
+
+save_plot(path(output_dir, "20240614/BMDC/OE/pooled_targets3.pdf"), p, 
+          dpi = 90, base_aspect_ratio = 3.5)
+
+```
+
+#Plots by cytokine
+```{r}
+c = "MCP1"
+#go back to full dataset
+plot_me2 <- plot_me %>% 
+            mutate(Perturbation = factor(Perturbation,
+              levels = c("shCTRL", "sh57", "sh73a", "sh73b",
+                         "sh73ab_pool")),
+              Target = ifelse(grepl("CTRL", sample), "CTRL",
+                              ifelse(grepl("57", sample), "57",
+                                     ifelse(grepl("73a-|73a_", sample), "73a",
+                                            ifelse(grepl("73b-|73b_", sample), "73b",
+                                                   "73ab_pool")))),
+              Target = factor(Target, 
+                              levels = c("CTRL", "57", "73a", "73b", "73ab_pool"))) %>%
+            arrange(Target, Perturbation, Guide)
+
+plot_me3 = plot_me2 %>% mutate(sample = factor(sample, levels = unique(plot_me2$sample))) #%>%
+           filter((grepl("CTRL|73ab", sample)))
+Cytokines = plot_me3 %>% select(Cytokine) %>% unique() %>% unlist()
+
+
+for(c in Cytokines){#single guides
+p1<-ggplot(plot_me3 %>% filter(Cytokine==c & pool == F),
+          aes(x = sample, y = avg_conc, fill = Target, alpha = Guide)) +
+  geom_col(stat = "identity", position = position_dodge(0.9),
+           color = "black") +
+  geom_errorbar(mapping =aes(ymin= avg_conc - se, ymax= avg_conc + se), 
+                          width=0.4, 
+                          position = position_dodge(0.9), 
+                          stat = "identity", 
+                          colour="black", alpha=0.9, size=0.5) +
+  scale_fill_manual(values = c("CTRL" ="white",
+                               "57" = "#7CAE00", 
+                               "73a" = "#00BFC4",
+                                "73b" = "#F8766D", 
+                                  "73ab_pool" = "#C77CFF")) +
+  #scale_alpha_manual(values = c(0.3,1)) +
+  labs(y = "Concentration (pg/mL)", x = NULL) +
+  facet_wrap(~Cytokine, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none",
+        text = element_text(size = 12))
+
+#pooled guides
+p2<-ggplot(plot_me3 %>% filter(Cytokine==c & (pool == T | Target == "CTRL")),
+          aes(x = sample, y = avg_conc, fill = Target, alpha = Guide)) +
+  geom_col(stat = "identity", position = position_dodge(0.9),
+           color = "black") +
+  geom_errorbar(mapping =aes(ymin= avg_conc - se, ymax= avg_conc + se), 
+                          width=0.4, 
+                          position = position_dodge(0.9), 
+                          stat = "identity", 
+                          colour="black", alpha=0.9, size=0.5) +
+  scale_fill_manual(values = c("CTRL" ="white",
+                               "57" = "#7CAE00", 
+                               "73a" = "#00BFC4",
+                                "73b" = "#F8766D", 
+                                  "73ab_pool" = "#C77CFF")) +
+  #scale_alpha_manual(values = c(0.3,1)) +
+  labs(y = "Concentration (pg/mL)", x = NULL) +
+  facet_wrap(~Cytokine, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none",
+        text = element_text(size = 12))
+  
+  
+#altogehter
+p_all<-plot_grid(plotlist = list(p1,p2), nrow=1, align = "hv", 
+                 rel_widths = c(1.5,1))
+p_all
+
+save_plot(path(output_dir, str_c("20240603/shSnora_pilot/by_cytokine/", c, "/all_targets.pdf")), p_all, 
+          dpi = 90, 
+          base_aspect_ratio = 2.25)
+
+}
+```
+
+

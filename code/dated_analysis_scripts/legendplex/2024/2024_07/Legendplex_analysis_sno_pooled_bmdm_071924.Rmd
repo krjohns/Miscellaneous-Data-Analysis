@@ -1,0 +1,206 @@
+---
+title: "Legendplex_analysis_121022"
+author: "Kate Johnson"
+date: "2022-12-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# libraries ----
+```{r}
+library(tidyverse)
+library(fs)
+library(cowplot)
+```
+
+# directories ----
+```{r}
+wd = getwd()
+input_dir = fs::path(wd, "../../input/data")
+output_dir = fs::path(wd, "../../output/2024/2024_07/20240719_sno")
+```
+
+# load data ----
+```{r}
+ids = read.csv(path(input_dir, "2024/2024_06/sno_scrn/sno_target_ids.csv")) 
+dat = read.csv(path(input_dir, "2024/2024_07/20240719_pooled_sno_bmbm_antivirus.csv")) 
+      
+```
+
+
+#format data ---
+```{r}
+df = dat %>%
+     data.frame() %>%
+     filter(sample_type != "Standard" & sample != "empty") %>% # drop standard rows
+     select(-c(experiment, well, dilution, sample_type)) %>% # drop dilution,experiment, well column (not needed)
+     rename_all(~gsub("[A-B][0-9]+$", "", gsub("\\.", "", .))) %>% # rename cols to simplify
+     mutate(Experiment = ifelse(grepl("sg", sample), "Ctu", "Sno"),
+            pool = grepl("pool", sample),
+            Target = ifelse(grepl("Ctrl", sample), "Ctrl",
+                            ifelse(pool == T, gsub("_.*", "", sample),
+                                   plyr::mapvalues(sample, 
+                                                   from = ids$Number , 
+                                                   to = ids$Mouse_gene))),
+            Human = ifelse(grepl("Ctrl", sample), "Ctrl",
+                           plyr::mapvalues(Target, 
+                                           from = ids$Mouse_gene , 
+                                           to = ids$Human_gene))) %>%
+     mutate_all(~ifelse(is.na(.), "NA", .)) %>%
+     mutate_all(~gsub("<", "", gsub(">","",.))) %>% # remove < sign from df
+     rename(Replicate = replicate) %>%
+     #remove ctu samples
+     filter(Experiment != "Ctu") %>%
+     dplyr::select(-Experiment)
+
+
+#average reps and compute se
+plot_me = df %>%
+          pivot_longer(cols = -c(Target, Human, Replicate, sample, pool), 
+                       names_to = "Cytokine", values_to = "Concentration") %>%
+          #dplyr::select(-Name) %>% #drop for pivoting
+          mutate_at(vars(Concentration), ~as.numeric(.)) %>%# make concentrations numeric
+          pivot_wider(names_from = Replicate, 
+                      values_from = Concentration, names_prefix = "Rep_",) %>%
+          rowwise() #%>% # prep for rowwise calcs
+         # mutate(avg_conc = mean(c(Rep_1, Rep_2), na.rm=T), # compute average and stdev
+                # stdev = sd(c(Rep_1, Rep_2), na.rm=T),
+                 #se =  stdev/sqrt(2)) 
+```
+
+
+# plotting! ----
+```{r, warning = F}
+
+Cytokines = plot_me %>% select(Cytokine) %>%
+            unique() %>% 
+            unlist() %>%
+            sort()
+
+control_means = plot_me %>% 
+                filter(Target == "Ctrl") %>%
+                dplyr::select(sample, Cytokine, Rep_1) %>%
+                ungroup() %>%
+                group_by(Cytokine) %>%
+                #rowwise() %>%
+                summarise(control_mean = mean(Rep_1)) %>%
+                mutate(Cytokine = factor(Cytokine, levels = Cytokines))
+
+
+plot_me2 <- plot_me %>% 
+            full_join(control_means, by = "Cytokine") %>%
+            filter(pool == F) %>%
+            mutate(sample2 = ifelse(Target == "Ctrl", sample, Target)) %>%
+            arrange(Human, Cytokine)
+
+
+plot_me3 = plot_me2 %>% 
+           mutate(sample2 = factor(sample2, levels = unique(plot_me2$sample2)),
+                   Cytokine = factor(Cytokine, levels = Cytokines),
+                  Human = str_to_upper(Human))
+
+p<-ggplot(plot_me3 %>% filter(Cytokine %in% Cytokines[11:13]),
+          aes(x = sample2, y = Rep_1, fill = Human)) +
+  geom_col(stat = "identity", position = position_dodge(0.9),
+           color = "black") +
+  #geom_errorbar(mapping =aes(ymin= avg_conc - se, ymax= avg_conc + se), 
+                         # width=0.4, 
+                         # position = position_dodge(0.9), 
+                         # stat = "identity", 
+                         # colour="black", alpha=0.9, size=0.5) +
+  scale_fill_manual(values = c("white",
+                               '#e6194b',"#ED6868",'#fabebe',
+                               "#f58231",'#ffe119', '#fffac8','#bcf60c',
+                               "#6FBE44","#176533", "#AED29E",
+                               "#5BABA4",'#46f0f0',
+                               "#A6DFF7", '#4363d8','#000075',
+                               '#e6beff', "#9E7FB8",'#911eb4',
+                               '#f032e6',  "#D278AE",
+                                '#800000', "#DA9B90", "#AE9492",'#9a6324',"#BFBEBE"
+                                )) +
+  #scale_alpha_manual(values = c(0.3,1)) +
+  labs(y = "Concentration (pg/mL)", x = NULL) +
+  facet_wrap(~Cytokine, scales = "free_y", ncol =1) +
+  geom_hline(data=control_means %>% filter(Cytokine %in% Cytokines[11:13]),
+                                 aes(yintercept = control_mean), 
+                                 linetype =2, color = "black") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none",
+        text = element_text(size = 12)) +
+        guides(fill = guide_legend(nrow=2))
+             
+
+save_plot(path(output_dir, "single_target_cytokines11-13.pdf"), p, 
+          dpi = 90, base_aspect_ratio = 2)
+
+```
+
+
+plotting pooled samples
+```{r}
+
+Cytokines = plot_me %>% select(Cytokine) %>%
+            unique() %>% 
+            unlist() %>%
+            sort()
+
+control_means = plot_me %>% 
+                filter(Target == "Ctrl") %>%
+                dplyr::select(sample, Cytokine, Rep_1) %>%
+                ungroup() %>%
+                group_by(Cytokine) %>%
+                #rowwise() %>%
+                summarise(control_mean = mean(Rep_1)) %>%
+                mutate(Cytokine = factor(Cytokine, levels = Cytokines))
+
+
+plot_me2 <- plot_me %>% 
+            full_join(control_means, by = "Cytokine") %>%
+            filter(Target == "Ctrl" | pool == T) %>%
+            mutate(sample2 = ifelse(Target == "Ctrl", sample, Target)) %>%
+            arrange(Target, Human, Cytokine)
+
+
+plot_me3 = plot_me2 %>% 
+           mutate(sample2 = factor(sample2, levels = unique(plot_me2$sample2)),
+                   Cytokine = factor(Cytokine, levels = Cytokines),
+                  Human = str_to_upper(Human))
+
+p<-ggplot(plot_me3 %>% filter(Cytokine %in% Cytokines[11:13]),
+          aes(x = sample2, y = Rep_1, fill = Human)) +
+  geom_col(stat = "identity", position = position_dodge(0.9),
+           color = "black") +
+  #geom_errorbar(mapping =aes(ymin= avg_conc - se, ymax= avg_conc + se), 
+                         # width=0.4, 
+                         # position = position_dodge(0.9), 
+                         # stat = "identity", 
+                         # colour="black", alpha=0.9, size=0.5) +
+  scale_fill_manual(values = c("CTRL"="white",
+                               '#e6194b',"#ED6868",'#fabebe',
+                               "#f58231",'#ffe119', '#fffac8','#bcf60c',
+                               "#6FBE44","#176533", "SNORA32" = "#AED29E",
+                               "#5BABA4","SNORA57" ='#46f0f0',
+                               "#A6DFF7","SNORA63" ='#4363d8','#000075',
+                               "SNORA65" ='#e6beff', "SNORA70" = "#9E7FB8",'#911eb4',
+                               "SNORA73"='#f032e6', "SNORA79"= "#D278AE",
+                                '#800000', "#DA9B90", "#AE9492",'#9a6324',"#BFBEBE"
+                                )) +
+  #scale_alpha_manual(values = c(0.3,1)) +
+  labs(y = "Concentration (pg/mL)", x = NULL) +
+  facet_wrap(~Cytokine, scales = "free_y", ncol =1) +
+  geom_hline(data=control_means %>% filter(Cytokine %in% Cytokines[11:13]),
+                                 aes(yintercept = control_mean), 
+                                 linetype =2, color = "black") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none",
+        text = element_text(size = 12)) +
+        guides(fill = guide_legend(nrow=2))
+             
+
+save_plot(path(output_dir, "target_pools_cytokines11-13.pdf"), p, 
+          dpi = 90, base_aspect_ratio = 1.5)
+
+```

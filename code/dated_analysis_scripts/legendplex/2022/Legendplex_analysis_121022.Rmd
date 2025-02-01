@@ -1,0 +1,129 @@
+---
+title: "Legendplex_analysis_121022"
+author: "Kate Johnson"
+date: "2022-12-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# libraries ----
+```{r}
+library(tidyverse)
+library(fs)
+```
+
+# directories ----
+```{r}
+wd = getwd()
+input_dir = fs::path(wd, "../input")
+output_dir = fs::path(wd, "../output")
+```
+
+# load data ----
+```{r}
+dat = read.csv(path(input_dir, "Mu_infl_legendplex_121022.csv")) 
+      
+```
+
+
+#format data ---
+```{r}
+df = dat %>%
+     data.frame() %>%
+     filter(!(`X.Name` == "")) %>% # get rid of first row (just has units)
+     rename_at(vars(`X.Name`), ~gsub("X\\.", "", .)) %>% #rename first col to avoid deletion in next line
+     dplyr::select(!(contains("X"))) %>% # get rid of dilution column and other blank cols
+     rename_all(~gsub("^[A-B][0-9]+", "", gsub("\\.", "", .))) %>% # rename cols to simplify
+     mutate(Name = gsub("Inflammation_", "", gsub("_Sample.*", "", Name))) %>% # rename Name row to simplify
+     mutate_all(~gsub("<", "", gsub(">","",.))) %>% # remove < sign from df
+     # add sample info
+     # treatment (cols 2/5 = L; 3/6 = S; 4/7 = LS -- row G = Control)
+     mutate(treatment = ifelse(grepl("[A-F][2;5]", Name), "L",
+                               ifelse(grepl("G", Name), "Control", 
+                                      ifelse(grepl("[A-F][3;6]", Name), "S", "LS"))), 
+            .after = 1,
+           # time (2-4 = h6, 5-7 = h2)
+            time = ifelse(grepl("G", Name), 0,
+                          ifelse(grepl("[A-F][2-4]",Name), 6, 2)),
+           # dose (A/B = low, CD = med, EF = high, G = none)
+            dose = ifelse(grepl("G", Name), "none", 
+                          ifelse(grepl("[A-B]", Name), "Low",
+                                 ifelse(grepl("[C-D]", Name), "Med", "High"))),
+           # rep (A,C,E, G2= rep1 ; BDF, G3 = rep2, G4 = rep3)
+            rep = ifelse(grepl("[A;C;E]|G2", Name), 1,
+                         ifelse(grepl("[B;D;F]|G3", Name), 2, 3)))
+
+
+#average reps and compute se
+plot_me = df %>%
+          pivot_longer(cols = -c(Name, treatment, time, dose, rep), 
+                       names_to = "gene", values_to = "concentration") %>%
+          dplyr::select(-Name) %>% #drop for pivoting
+          mutate_at(vars(concentration), ~as.numeric(.)) %>%# make concentrations numeric
+          pivot_wider(names_from = rep, values_from = concentration, names_prefix = "Rep_",) %>%
+          rowwise() %>% # prep for rowwise calcs
+          mutate(avg_conc = mean(c(Rep_1, Rep_2, Rep_3), na.rm=T), # compute average and stdev
+                 stdev = sd(c(Rep_1, Rep_2, Rep_3), na.rm=T),
+                 se = ifelse(treatment == "Control", stdev/sqrt(3), stdev/sqrt(2))) 
+```
+
+
+# plotting! ----
+```{r, warning = F}
+source(path(wd, "4_plotting_fxns.R"))
+#prep factors etc for plotting
+plot_me = plot_me %>%
+                #assign type info for coloring in plot
+          mutate(type = ifelse(treatment == "Control","None",ifelse(nchar(treatment) ==2, "Pair", "Single")), 
+                 #factor treatment for correct ordering
+                 treatment = factor(treatment, levels = c("Control","L", "S", "LS")), 
+                 dose = factor(dose, levels = c("None", "Low", "Med", "High")),
+                 type = factor(type, levels = c("None", "Single", "Pair")),
+                 time = str_c(as.character(time), " hours")) #factor dose for correct ordering
+             
+#add dummy control data
+control = plot_me %>%
+          filter(treatment == "Control") %>%
+          mutate(time = "2 hours",
+                 dose = "None")
+
+control_6 = control %>%
+            mutate(time = "6 hours")
+
+plot_me2 = plot_me %>%
+           filter(treatment != "Control") %>% # filter out controls
+           rbind(rbind(control, control_6)) 
+
+#add dummy control data for all doses
+controls = plot_me2 %>%
+           data.frame() %>%
+           filter(treatment == "Control") %>%
+           mutate(dose = "Low")
+
+cm = controls %>%
+     mutate(dose = "Med")
+ch = controls %>%
+     mutate(dose = "High")
+
+plot_me3 = plot_me2 %>%
+           data.frame() %>%
+           filter(treatment != "Control") %>% # filter out controls
+           rbind(rbind(controls, rbind(cm, ch)))
+
+genes = sort(unique(plot_me3$gene))
+
+#cant use %in%  with filter -- use subset!!!
+
+#dat,x,y,se,fill, alpha, grouping, facet_x, facet_y
+p = make_qPCR_plot(plot_me3 %>% subset(gene %in% genes[7:13]),
+                   treatment, avg_conc, se, 
+                   type, time, time, gene, dose) +
+              labs(y = "Concentration (pg/mL)")
+
+save_plot(path(output_dir, "Legendplex_data_120822_byTime_plot2.pdf"), p, dpi = 90)
+
+```
+

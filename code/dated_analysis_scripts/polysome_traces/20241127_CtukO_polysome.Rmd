@@ -1,0 +1,115 @@
+---
+title: "CtuKO_polysome_trace"
+author: "Kate Johnson"
+date: "2024-11-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# libraries ----
+```{r}
+library(tidyverse)
+library(fs)
+library(cowplot)
+library(ggpubr) # for stats
+library(circlize) #for colorRamp2
+library(RcppGSL) # colNorm() function
+library(ComplexHeatmap)
+library(ggtext) #for element_markdown()
+library(readxl)
+```
+#set theme
+```{r}
+# Plot settings ----
+#compress PDFs
+tools::compactPDF('mypdfs/',  gs_quality='screen')
+###PLOTTING THEME ###
+theme_update(#text = element_text(size = rel(3)),
+             legend.title = element_text(size = rel(0.8)),
+             legend.key.size = unit(.09, 'inches'),
+             legend.text = element_text(size = rel(0.8)),
+             panel.background = element_rect(fill = "white",
+                                             colour = "black"),
+             axis.line = element_blank(),
+             plot.title = element_text(size = rel(1), 
+                                      face= "bold", hjust=0.5),
+             plot.margin = unit(c(0.08, 0.1, 0.01, 0.05), "inches"),
+             strip.background = element_rect(linewidth=0.35, color="black"),
+             legend.key = element_rect(colour = NA, fill = NA)) #trbl
+```
+
+# directories ----
+```{r}
+wd = getwd()
+input_dir = fs::path(wd, "../../../input/data/polysome_traces")
+output_dir = fs::path(wd, "../../../output/polysome_traces/20241127")
+```
+
+
+# load data ----
+```{r}
+dat = read_csv(path(input_dir, "20241127_CtuKO_polysome_traces_compiled.csv")) 
+
+```
+
+#find monosme peak
+```{r}
+dat_pivot = dat %>%
+            pivot_longer(cols = c(3:14), names_to = "Sample", values_to = "Absorbance") %>%
+            mutate(Replicate = gsub(".*_", "", Sample),
+                   Target_guide = gsub("_.*", "", Sample),
+                   Target = gsub("-.*", "", Target_guide))
+
+#save fraction labels
+fracs = dat %>%
+        select(Fraction, `Distance(mm)`) %>%
+        filter(!(is.na(Fraction)))
+
+#find monosome peak
+max = dat_pivot %>%
+      select(-Fraction) %>%
+      filter(`Distance(mm)` > 35 & `Distance(mm)` < 50) %>%
+      group_by(Sample, Replicate, Target, Target_guide) %>%
+      summarise(Monosome_peak = max(Absorbance)) %>%
+      ungroup()
+
+dat_pivot_merge = dat_pivot %>%
+                  select(-Fraction) %>%
+                  merge(max, by = c("Sample", "Target", "Target_guide", "Replicate")) %>%
+                  mutate(Rel_Abs = Absorbance / Monosome_peak)
+
+```
+
+#plot
+```{r}
+plot_me = dat_pivot_merge %>% 
+          #filter(Replicate == "1") %>%
+          mutate(guide = gsub(".*-",  "",Target_guide))
+ 
+p<-ggplot(plot_me, aes(x = `Distance(mm)`, y = Rel_Abs, color = Target, linetype = guide)) +
+      geom_line()  +
+      xlim(28,96) + #not28
+      ylim(0.7,1.25) +
+      geom_vline(xintercept = 9.58) +
+      geom_vline(xintercept = 28.79) +
+      geom_vline(xintercept = 38.39) +
+      geom_vline(xintercept = 47.98) +
+      geom_vline(xintercept = 51.19) +
+      geom_vline(xintercept = 95.99) +
+      labs(y = "Relative Absorbance") +
+      facet_grid(Target~Replicate) +
+      scale_color_manual(values = c("sgSCR" = "black",
+                                    "sgCtu1" = "#D278AE",
+                                    "sgCtu2" = "#9E7FB8"))
+      
+p
+save_plot(path(output_dir, "20241127_CtuKO_polysome_trace_byTarget_withFRACs.pdf"), p, base_aspect_ratio = 1.5)
+```
+

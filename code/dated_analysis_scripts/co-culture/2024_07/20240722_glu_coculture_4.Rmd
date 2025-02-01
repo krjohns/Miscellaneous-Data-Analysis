@@ -1,0 +1,129 @@
+---
+title: "Glu_inhibitor_coculture"
+author: "Kate Johnson"
+date: "2024-07-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# libraries ----
+```{r}
+library(tidyverse)
+library(fs)
+library(cowplot)
+library(ggpubr) # for stats
+```
+
+# directories ----
+```{r}
+wd = getwd()
+input_dir = fs::path(wd, "../../input/data")
+output_dir = fs::path(wd, "../../output/2024/2024_07/20240722/Glu_inhib_coculture4")
+```
+
+# load data ----
+```{r}
+dat = read.csv(path(input_dir, "2024/2024_07/20240722_glu_inhib_coculture4.csv")) 
+```
+
+#dot plots of everything at once
+```{r}
+plot_me = dat %>% 
+          #filter(Treatment == "LSG+OVA") %>%
+          #filter low prolif bc dead
+          #%>%
+          #factor drug list
+          mutate(Drug = factor(Drug, levels = c("None", "DMSO", "Glutamate", "AAA",
+                                               "Erastin", "DL-AP4", "CPCCOEt",
+                                               "MPEP", "Cerestat", "D-AP5",
+                                               "DNQX")))
+
+ggplot(plot_me, aes(x = str_c(Concentration, " ", Unit), 
+                y = Proliferated,
+                color = Treatment)) +
+    #geom_col()
+    geom_point(size = 3) +
+    scale_color_manual(values = c("OVA" = "black",
+                                  "LSG+OVA" = "#F68064")) +
+    #ylim(50,95) +
+    #scale_x_continuous(trans = scales::pseudo_log_trans(sigma = 0.0001)) +
+    labs(x = str_c("Concentration (DMSO: % v/v; else uM)"), 
+         y = "% Proliferated") +
+    facet_wrap(~Drug, scales = "free_x", nrow =1) +
+    theme(legend.position = "none",
+          text = element_text(size = 14),
+          axis.text.x = element_text(angle=45, hjust = 1, size = 10),
+          plot.title = element_text(hjust =0.5, size = 12))
+
+save_plot(path(output_dir, "All_drugs_proliferated.pdf"), p, base_aspect_ratio = 4)
+
+```
+
+
+#bar plots
+
+```{r}
+plot_me = dat %>%
+          #factor drug list
+          mutate(#Drug = ifelse(Drug == "None" & 
+                       #          Treatment == "OVA", "None \n(Untreated)",
+                           #   ifelse(Drug == "None" & Treatment == "LSG+OVA",
+                            #         "None \n(Treated)", Drug)),
+                 Drug = factor(Drug, levels = c("None", # \n(Untreated)", "None \n(Treated)",
+                                                "DMSO", "Glutamate", "AAA",
+                                               "Erastin","Cerestat", "D-AP5",
+                                               "DNQX", "MPEP", "DL-AP4", "CPCCOEt")),
+                 Treatment = factor(Treatment, levels = c("OVA", "LSG+OVA"))) %>%
+          group_by(Drug, Concentration, Unit, Dilution, Treatment) %>%
+          filter(!(Drug %in% c("DMSO", "Glutamate"))) %>%
+          mutate(avg = mean(Live),
+                 se = sd(Live)/sqrt(3),
+                 Drug2 = ifelse(grepl("None", Drug),"None",
+                                str_c(Drug, " (", round(Concentration,2), Unit, ")"))) %>%
+          arrange(Drug, desc(Concentration))
+
+plot_me2 = plot_me %>% mutate(Drug2 = factor(Drug2, levels = unique(plot_me$Drug2)))
+means = plot_me2 %>% select(Drug, Drug2, avg) %>% unique()
+
+p<-ggplot(plot_me2, 
+       aes(x = Drug2, 
+           y = Live,)) +
+  geom_col(data = means, aes(y = avg,
+                             alpha = as.character(Dilution),
+                             fill = Treatment), 
+                             position = position_dodge2(width =1,preserve = "total"), 
+            color = "black") +
+  geom_point(#aes(#alpha = as.character(Dilution),
+                  #fill = Treatment), 
+    position = position_dodge2(width = 1, preserve = "total"),
+    size = 1) +
+  geom_errorbar(aes(ymin=avg-se, max=avg + se), color = "black",
+                                  width=0.5, size = 1) +
+  geom_hline(#data = plot_me2 %>% filter(Drug2 == "None (Treated)"),
+             aes(yintercept = 64.23), linetype =2) +
+  scale_fill_manual(values = c("OVA" = "white",
+                                "LSG+OVA" = "#F68064")) +
+  scale_alpha_manual(values = c("3" = 0.3, "2" = 0.6, "1" = 1)) +
+  facet_wrap(~Drug, scales="free_x", nrow=1) +
+  labs(x = NULL, y = "% Live") +
+  theme(axis.text.x =element_text(angle =45,hjust =1),
+        strip.background = element_rect(size=0.35,color="white", fill = "white"),
+        panel.background = element_rect(fill = "white", colour = "black")) +
+  guides(alpha = "none" )
+
+
+save_plot(path(output_dir, "MMCA_Live.pdf"), p,
+          base_aspect_ratio = 3)
+
+stat_compare_means(mapping = aes(x = Drug2, y = Proliferated),
+                     method = "wilcox",
+                     ref.group = "None",
+                     label = "p.signif")
+p
+```
+
+
+#max conc. only
+

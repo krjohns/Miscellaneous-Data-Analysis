@@ -1,0 +1,99 @@
+---
+title: "Legendplex_analysis_121022"
+author: "Kate Johnson"
+date: "2022-12-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# libraries ----
+```{r}
+library(tidyverse)
+library(fs)
+library(cowplot)
+```
+
+# directories ----
+```{r}
+wd = getwd()
+input_dir = fs::path(wd, "../../input/data")
+output_dir = fs::path(wd, "../../output/2024/2024_04")
+```
+
+# load data ----
+```{r}
+dat = read.csv(path(input_dir, "2024/2024_04/20240401_Glu_OE_summary_conc.csv")) 
+      
+```
+
+
+#format data ---
+```{r}
+df = dat %>%
+     data.frame() %>%
+     filter(sample_type != "Standard") %>% # drop standard rows
+     select(-c(experiment, well, dilution, sample_type)) %>% # drop dilution,experiment, well column (not needed)
+     rename_all(~gsub("[A-B][0-9]+$", "", gsub("\\.", "", .))) %>% # rename cols to simplify
+     separate(sample, 
+              into =c("Cell_type", "Perturbation", "Treatment", "Time"), 
+              sep ="_") %>% # separate sample info into multiple columns
+     mutate_all(~gsub("<", "", gsub(">","",.))) %>% # remove < sign from df
+     rename(Replicate = replicate)
+
+
+#average reps and compute se
+plot_me = df %>%
+          pivot_longer(cols = -c(Cell_type, Perturbation, Treatment, Time, Replicate), 
+                       names_to = "Cytokine", values_to = "Concentration") %>%
+          #dplyr::select(-Name) %>% #drop for pivoting
+          mutate_at(vars(Concentration), ~as.numeric(.)) %>%# make concentrations numeric
+          pivot_wider(names_from = Replicate, values_from = Concentration, names_prefix = "Rep_",) %>%
+          rowwise() %>% # prep for rowwise calcs
+          mutate(avg_conc = mean(c(Rep_1, Rep_2, Rep_3), na.rm=T), # compute average and stdev
+                 stdev = sd(c(Rep_1, Rep_2, Rep_3), na.rm=T),
+                 se = ifelse(Treatment == "LPS" & Cell_type == "BMDC" & 
+                               Time == "8h" & Perturbation == "Glu-TTC-1.3", stdev/sqrt(2), stdev/sqrt(3))) 
+```
+
+
+# plotting! ----
+```{r, warning = F}
+source(path(wd, "4_plotting_fxns.R"))
+#prep factors etc for plotting
+plot_me = plot_me %>%
+                #assign type info for coloring in plot
+          mutate(#factor treatment for correct ordering
+                 Treatment = gsub("LPS", "Lipopolysaccharide", Treatment),
+                 Treatment = factor(Treatment, levels = c("Control","Lipopolysaccharide", "L-S-G")), 
+                 Perturbation = gsub("Untransduced", "WT", Perturbation),
+                 Perturbation = factor(Perturbation, 
+                                       levels =c ("WT", "Glu-CTC-1.1", "Glu-TTC-1.3", "Glu-TTC-2.1"))) 
+
+cytokines = unique(plot_me$Cytokine) %>% sort()
+h2_list = c("IFNb", "IL1a", "IL6",  "MCP1", "TNFa")
+
+p<-ggplot(plot_me %>% filter(Time == "8h" &  !(Cytokine %in% c("IFNb", "IL17A", "GMCSF",  "IL23","MCP1") )& Treatment != "L-S-G" ),
+          aes(x = Perturbation, y = avg_conc, fill = Treatment)) +
+  geom_col(stat = "identity", position = position_dodge(0.9),
+           alpha = 0.8, 
+          color = "black") +
+  geom_errorbar(mapping =aes(ymin= avg_conc - se, ymax= avg_conc + se), 
+                          width=0.4, 
+                          position = position_dodge(0.9), 
+                          stat = "identity", 
+                          colour="black", alpha=0.9, size=0.5) +
+  scale_fill_manual(values = c("Control" ="black", "Lipopolysaccharide" = "#8C9FCA", "L-S-G" = "#F68064")) +
+  labs(y = "Concentration (pg/mL)", x = NULL) +
+  ggh4x::facet_grid2(Cell_type~Cytokine, independent = "y",scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "bottom")
+             
+
+
+save_plot(path(output_dir, "8h/detected_cytokines_L_3.pdf"), p, dpi = 90, base_aspect_ratio = 2)
+
+```
+

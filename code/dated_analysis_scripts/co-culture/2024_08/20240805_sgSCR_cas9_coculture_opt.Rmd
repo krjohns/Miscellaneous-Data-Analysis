@@ -1,0 +1,87 @@
+---
+title: "sgSCR Cas9 co-culture opt"
+author: "Kate Johnson"
+date: "2024-08-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# libraries ----
+```{r}
+library(tidyverse)
+library(fs)
+library(cowplot)
+library(ggpubr) # for stats
+```
+
+# directories ----
+```{r}
+wd = getwd()
+input_dir = fs::path(wd, "../../input/data")
+output_dir = fs::path(wd, "../../output/2024/2024_08/20240805/sgSCR_Cas9_Cocult_Opt")
+```
+
+# load data ----
+```{r}
+dat = read.csv(path(input_dir, "2024/2024_08/20240805_sgSCR_cas9_opt.csv")) 
+```
+
+
+#bar plots
+```{r}
+plot_me = dat %>%
+          group_by(Treatment, Mouse, BMDC_num, T_num) %>%
+          mutate(avg_live = mean(Live),
+                 se_live = sd(Live)/sqrt(3),
+                 avg_prolif = mean(Proliferated),
+                 se_prolif = sd(Proliferated)/sqrt(3)) %>%
+          mutate(Treatment = factor(Treatment, levels = c("OVA only", "L", "LSG")),
+                 Mouse = factor(Mouse, levels = c("WT", "Cas9")),
+                 T_num = str_c(T_num, " Tcells"),
+                 T_num = factor(T_num, 
+                                levels = c("50k Tcells", "100k Tcells", "200k Tcells")),
+                 BMDC_num = str_c(BMDC_num, " BMDCs (", Mouse, ")")) %>%
+          arrange(Mouse, Treatment, BMDC_num, T_num)
+
+means = plot_me %>% 
+        select(Mouse, Treatment, BMDC_num, T_num, avg_live,
+               se_live, avg_prolif, se_prolif) %>% 
+        unique()
+
+
+#plot
+p<-ggplot(plot_me, 
+       #str_c(BMDC_num, " BMDCs +\n", T_num, " T cells")
+       aes(x = Treatment,
+           y = Live)) +
+  geom_col(data = means ,
+           aes(y = avg_live,
+               fill = Treatment,
+               alpha = T_num), 
+               position = position_dodge2(width =1,preserve = "single"), 
+            color = "black") +
+  geom_point( position = position_dodge2(width = 1, preserve = "single"),
+              size = 1) +
+  scale_fill_manual(values = c("OVA only" = "grey",
+                                "L" = "#B9CEE6",
+                                "LSG" = "#F68064")) +
+  scale_alpha_manual(values = c("50k Tcells" = 0.5, 
+                                "100k Tcells" = 0.75, 
+                                "200k Tcells" = 1)) +
+  facet_wrap(~BMDC_num, scales ="free_x") +
+  labs(x = NULL, y = "% Live") +
+  theme(axis.text.x =element_text(angle =45,hjust =1),
+        text = element_text(size=8),
+        legend.position = "none") +
+  guides(fill="none")
+
+p
+save_plot(path(output_dir, "Percent_Live.pdf"), p,
+          base_aspect_ratio = 2)
+
+
+```
+
+

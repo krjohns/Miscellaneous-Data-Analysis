@@ -1,0 +1,144 @@
+---
+title: "b16 tumor exp analysis"
+author: "Kate Johnson"
+date: "2024-11-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# libraries ----
+```{r}
+library(tidyverse)
+library(fs)
+library(cowplot)
+library(ggpubr) # for stats
+library(circlize) #for colorRamp2
+library(RcppGSL) # colNorm() function
+library(ComplexHeatmap)
+library(ggtext) #for element_markdown()
+library(readxl)
+
+```
+#set theme
+```{r}
+# Plot settings ----
+#compress PDFs
+tools::compactPDF('mypdfs/',  gs_quality='screen')
+###PLOTTING THEME ###
+theme_update(#text = element_text(size = rel(3)),
+             legend.title = element_text(size = rel(0.8)),
+             legend.key.size = unit(.09, 'inches'),
+             legend.text = element_text(size = rel(0.8)),
+             panel.background = element_rect(fill = "white",
+                                             colour = "black"),
+             axis.line = element_blank(),
+             plot.title = element_text(size = rel(1), 
+                                      face= "bold", hjust=0.5),
+             plot.margin = unit(c(0.08, 0.1, 0.01, 0.05), "inches"),
+             strip.background = element_rect(linewidth=0.35, color="black"),
+             legend.key = element_rect(colour = NA, fill = NA)) #trbl
+```
+
+# directories ----
+```{r}
+wd = getwd()
+input_dir = fs::path(wd, "../../../../../../Data/b16_tumor")
+output_dir = fs::path(wd, "../../../output/b16_tumors")
+```
+
+
+# load data ----
+```{r}
+dat = read_excel(path(input_dir, "20250122_b16_tumor_exp9.xlsx"), sheet = "measurement_log") 
+
+```
+
+# plot ----
+```{r}
+exp = "9"
+day = 7
+my_comps = list("SCR-OVA-LSG" = "OVA|SCR-LSG", "SCR-OVA-Ctu2g1" = "SCR-OVA|Ctu2_g1",
+                "SCR-LSG-Ctu2g1" = "SCR-LSG|Ctu2_g1", "SCR-OVA-Ctu2g2" = "OVA|Ctu2_g2",
+                "SCR-LSG-Ctu2g2" = "SCR-LSG|Ctu2_g2")
+
+#my_comps = list("SCR-OVA-Ctu2g1" = "SCR-OVA|Ctu2_g1",
+            #    "SCR-LSG-Ctu2g1" = "SCR-LSG|Ctu2_g1")
+for(i in (1:length(my_comps))){#calc tumor volume (.5 * D * d^2) D = Y, d = X
+  plot_me = dat %>% 
+          select(Mouse_ID,  Day, Group, Cage_card, Condition, X_Dimension, Y_Dimension,
+                 calc_vol) %>%
+          #add 'sg' to Condition names to make consistent with previous exps
+          mutate(Condition =str_c("sg", Condition)) %>%
+          filter((grepl(my_comps[[i]], Condition))) %>%
+          mutate(Minor = as.numeric(X_Dimension) < as.numeric(Y_Dimension),
+                 D1 = ifelse(Minor, as.numeric(Y_Dimension), as.numeric(X_Dimension)),
+                 d1 = ifelse(Minor, as.numeric(X_Dimension), as.numeric(Y_Dimension)),
+                 D = as.numeric(Y_Dimension),
+                 d = as.numeric(X_Dimension),
+                 Mouse_ID = str_c(Group, "_", "M", Mouse_ID), #Cage_card,
+                 Day = as.numeric(gsub("d", "", Day)),
+                 Volume = 0.5*D1*(d1)^2,
+                 Condition = factor(Condition, 
+                                    levels = c("sgSCR-OVA", "sgSCR-LSG",
+                                    "sgCtu2_g1-LSG", "sgCtu2_g2-LSG"))) %>%
+          filter(Day <= day) 
+
+
+#calc averages
+means = plot_me %>%
+        select(Group, Condition, Volume, Mouse_ID, Day) %>%
+        group_by(Group, Condition, Day) %>%
+        summarise(n = n(),
+                  mean = mean(Volume, na.rm=T),
+                  se = sd(Volume)/sqrt(n)) %>%
+        filter(!is.na(se))
+
+p_base <-ggplot(plot_me, aes(x = Day, y = Volume, color = Condition))+
+         scale_color_manual(values = c("sgSCR-OVA" ="black",
+                                       "B16_only" = "grey",
+                                "sgSCR-LSG" = "#F68064",
+                                "sgCtu2_g1-LSG" = "#C0ACD0",
+                                "sgCtu2_g2-LSG" ="orchid4")) +
+         labs(x = "Time (Days)", y = "Tumor Volume (mm<sup>3</sup>)", 
+              title = str_c("KJ B16-TE-", exp)) +
+         theme(axis.title.y = element_markdown())
+   
+p_indiv<-p_base +
+         geom_line(aes (
+                        #linetype = Tumor_leak, #as.character(Cage_card)
+                        group = Mouse_ID
+                        ), alpha = 0.4, linewidth = 1) 
+
+p_avg <-p_base +
+        geom_line(data = means, aes(x = Day, y =mean), linewidth = 1.75) +
+        geom_point(data = means, aes(x = Day, y = mean))
+
+p_indiv_avg<-p_indiv +
+       geom_line(data = means, aes(x = Day, y =mean), linewidth = 1.75) +
+       geom_point(data = means, aes(x = Day, y = mean)) 
+
+p_avg_error = p_avg +
+              geom_errorbar(data =means, aes(x = Day, ymin = mean-se, ymax = mean+se,
+                                 color  = Condition), 
+                            width = 0.3, linewidth = 1.75, inherit.aes = F) 
+p_everything = p_indiv_avg +
+               geom_errorbar(data =means, aes(x = Day, ymin = mean-se, ymax = mean+se,
+                                 color  = Condition), 
+                            width = 0.3, linewidth = 1.75, inherit.aes = F)
+p_list<-list("p_indiv" = p_indiv,
+          "p_indiv_avg" = p_indiv_avg,
+          "p_avg_error" = p_avg_error,
+          "p_everything" = p_everything)
+
+for(j in (1:length(p_list))){
+   save_plot(path(output_dir, str_c("TE", exp,"/d", as.character(day),"/d", as.character(day),"_all_cages/",
+                names(my_comps)[[i]], "/tumor_vol_TE", exp, "-",names(my_comps)[[i]],
+                names(p_list)[j], ".pdf")),
+                p_list[[j]], base_aspect_ratio =1.3)
+  }
+}
+
+```
+

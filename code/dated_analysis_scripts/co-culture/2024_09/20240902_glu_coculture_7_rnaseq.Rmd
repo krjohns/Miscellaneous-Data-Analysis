@@ -1,0 +1,91 @@
+---
+title: "Glu_inhibitor_coculture"
+author: "Kate Johnson"
+date: "2024-07-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# libraries ----
+```{r}
+library(tidyverse)
+library(fs)
+library(cowplot)
+library(ggpubr) # for stats
+```
+
+# directories ----
+```{r}
+wd = getwd()
+input_dir = fs::path(wd, "../../input/data")
+output_dir = fs::path(wd, "../../output/2024/2024_09/20240902/Glu_inhib_coculture7_RNAseq")
+```
+
+# load data ----
+```{r}
+dat = read.csv(path(input_dir, "2024/2024_09/20240902_glu_drug_rnaseq_tcell_flow.csv")) 
+```
+
+#bar plots
+```{r}
+
+plot_me = dat %>%
+          #factor drug list
+          mutate(Drug1 = factor(Drug1, levels = c("None", "DMSO (0.12%)",
+                                              "AAA (2mM)","AAA (10mM)",
+                                              "Erastin (4uM)", "Erastin (12uM)", 
+                                              "Cerestat (10uM)", "Cerestat (25uM)", 
+                                              "D-AP5 (10uM)","D-AP5 (100uM)")),
+                 Drug2 = factor(Drug2, levels = c("None",  "DMSO (0.12%)",
+                                              "AAA (2mM)","AAA (10mM)",
+                                              "Erastin (4uM)", "Erastin (12uM)", 
+                                              "Cerestat (10uM)", "Cerestat (25uM)", 
+                                              "D-AP5 (10uM)","D-AP5 (100uM)")),
+                 Treatment = factor(Treatment, levels = c("OVA", "LSG+OVA"))) %>%
+          group_by(Drug1, Drug2, DMSO, Treatment) %>%
+          mutate(avg_live = mean(Live),
+                 se_live = sd(Live)/sqrt(3),
+                 avg_prolif = mean(Proliferated_edit),
+                 se_prolif = sd(Proliferated_edit)/sqrt(3)) %>%
+          arrange(Drug2, Drug1, DMSO, Treatment)
+
+plot_me2 = plot_me %>%
+           mutate(Drug = gsub(" .*", "", Drug1),
+                  Drug = factor(Drug, levels = c("None", "DMSO", "AAA",
+                                                 "Erastin", "D-AP5", "Cerestat")),
+                  Name = ifelse(Drug2 !="None",
+                                str_c(Drug1, "+\n", Drug2), as.character(Drug1)),
+                  Name = factor(Name, levels = unique(Name)))
+
+means = plot_me2 %>% select(Name, Drug, Treatment, avg_prolif, avg_live) %>% unique()
+
+
+#plot
+p<-ggplot(plot_me2, 
+       aes(x = Name,
+           y = Proliferated_edit)) +
+  geom_col(data = means, 
+           aes(y = avg_prolif,
+           fill = Treatment), 
+           position = position_dodge2(width =1,preserve = "single"), 
+            color = "black") +
+  geom_point(position = position_dodge2(width = 1, preserve = "single"),
+             size = 1) +
+  geom_hline(aes(yintercept = 8.98), linetype =2) +
+  scale_fill_manual(values = c("OVA" = "white",
+                                "LSG+OVA" = "#F68064")) +
+  facet_wrap(~Drug, scales ="free_x", nrow =1) +
+  labs(x = NULL, y = "% OTII Proliferation") +
+  theme(axis.text.x =element_text(angle =45,hjust =1),
+        #axis.text.x = element_blank(),
+        text = element_text(size=14),
+        legend.position = "none",
+        strip.background = element_rect(size=0.35,color="white", fill = "white"),
+        panel.background = element_rect(fill = "white", colour = "black")) 
+
+p
+save_plot(path(output_dir, "Percent_proliferated_edit.pdf"), p,
+          base_aspect_ratio = 4)
+```

@@ -1,0 +1,138 @@
+---
+title: "Nfe2l1-2ko Co-culture Exp 3"
+author: "Kate Johnson"
+date: "2024-07-22"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# libraries ----
+```{r}
+library(tidyverse)
+library(fs)
+library(cowplot)
+library(ggpubr) # for stats
+```
+
+# directories ----
+```{r}
+wd = getwd()
+input_dir = fs::path(wd, "../../../../input/data")
+output_dir = fs::path(wd, "../../../../output/2024/2024_07/20240722/Nfe2l1-2ko_Coculture_Exp3")
+```
+
+# load data ----
+```{r}
+dat = read.csv(path(input_dir, "2024/2024_07/20240722_Nfe_coculture3_copy.csv")) 
+```
+
+
+#bar plots
+```{r}
+plot_me = dat %>%
+          select(-Sample) %>%
+          group_by(Target_Guide, Exp) %>%
+          mutate(n_live = n(),
+                 avg_live = mean(Live),
+                 se_live = sd(Live)/sqrt(n_live),
+                 avg_prolif = mean(Proliferated),
+                 n_prolif = n(),
+                 se_prolif = sd(Proliferated)/sqrt(n_prolif)) %>%
+          mutate(Target = gsub("-.*", "", Target_Guide),
+                 Target = factor(Target, levels = c("sgCtrl", "sgNfe2l1", "sgNfe2l2",
+                                                    "sgAtf3", "sgIrf3", "sgAtf3_sgIrf3",
+                                                    "sgIrf9", "sgMafb", "sgTbk1", "sgMyd88",
+                                                    "sgRela"))) %>%
+          arrange(Target) %>%
+          mutate(Target_Guide = factor(Target_Guide, levels = unique(Target_Guide)))
+
+means = plot_me %>% 
+        select(Target, Target_Guide, Exp,
+               avg_live, se_live, avg_prolif, se_prolif) %>% 
+        unique() %>%
+        mutate(Target = factor(Target, 
+                               levels = c("sgCtrl", "sgNfe2l1", "sgNfe2l2",
+                                          "sgAtf3", "sgIrf3", "sgAtf3_sgIrf3",
+                                          "sgIrf9", "sgMafb", "sgTbk1", "sgMyd88", "sgRela")),
+               Target_Guide = factor(Target_Guide, levels = c(str_c("sgCtrl-", c(5:10)),
+                                          "sgNfe2l1", "sgNfe2l2",
+                                          "sgAtf3", "sgIrf3", "sgAtf3_sgIrf3",
+                                          "sgIrf9", "sgMafb", "sgTbk1", "sgMyd88", "sgRela")))
+
+plot_me_filt = plot_me %>%
+               filter(Exp =="AM_Tfko")
+
+means_filt = means %>% filter(Exp == "AM_Tfko")
+
+#plot
+p<-ggplot(plot_me_filt, 
+       aes(x = Target_Guide,
+           y = Proliferated,
+           fill = Target)) +
+  geom_col(data = means_filt,
+           aes(y = avg_prolif), , 
+            color = "black") +
+  geom_point(size = 1) +
+  geom_errorbar(data= means_filt,
+                aes(ymin = avg_prolif - se_prolif, ymax = avg_prolif + se_prolif,
+                    x = Target_Guide),
+                inherit.aes=F) +
+  geom_hline(data = means_filt %>% filter(Target == "sgCtrl"), aes(yintercept = mean(avg_prolif)), linetype = 2) +
+  scale_fill_manual(values = c("sgCtrl" = "white",
+                                "sgNfe2l1" = "#7CAE00",
+                                "sgNfe2l2" = "#00BFC4",
+                               "sgAtf3" = "#AED29E",
+                                "sgIrf3" = "#A6DFF7",
+                                "sgAtf3_sgIrf3" = "#9E7FB8",
+                                 "sgTbk1" = "#F4908E",
+                                 "sgMafb" = "#D278AE",
+                                 "sgMyd88" = "#EED290",
+                                 "sgRela" = "#F29D65",
+                                "sgIrf9" = "#AE9492"))+
+  labs(x = NULL, y = "% OTII Proliferation") +
+  theme(axis.text.x =element_text(angle =45,hjust =1),
+        text = element_text(size=12),
+        legend.position = "none") 
+
+p
+save_plot(path(output_dir, "AM_TFko_Percent_Proliferated.pdf"), p,
+          base_aspect_ratio = 2)
+
+
+
+p<-ggplot(plot_me_filt, 
+       aes(x = Target_Guide,
+           y = Live,
+           fill = Target)) +
+  geom_col(data = means_filt,
+           aes(y = avg_live), , 
+            color = "black") +
+  geom_point(size = 1) +
+  geom_errorbar(data= means_filt,
+                aes(ymin = avg_live - se_live, ymax = avg_live + se_live,
+                    x = Target_Guide),
+                inherit.aes=F) +
+  geom_hline(data = means_filt %>% filter(Target == "sgCtrl"), aes(yintercept = mean(avg_live)), linetype = 2) +
+  scale_fill_manual(values = c("sgCtrl" = "white",
+                                "sgAtf3" = "#AED29E",
+                                "sgIrf3" = "#A6DFF7",
+                                "sgAtf3_sgIrf3" = "#9E7FB8",
+                                 "sgTbk1" = "#F4908E",
+                                 "sgMafb" = "#D278AE",
+                                 "sgMyd88" = "#EED290",
+                                 "sgRela" = "#F29D65",
+                                "sgIrf9" = "#AE9492"))+
+  labs(x = NULL, y = "% Live OTII Cells") +
+  theme(axis.text.x =element_text(angle =45,hjust =1),
+        text = element_text(size=12),
+        legend.position = "none") 
+
+p
+save_plot(path(output_dir, "AM_TFko_Percent_Live.pdf"), p,
+          base_aspect_ratio = 2)
+
+```
+
+
