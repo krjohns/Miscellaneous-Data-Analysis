@@ -58,7 +58,7 @@ dat = read_excel(path(input_dir, "20250117_b16_tumor_exp8.xlsx"), sheet = "measu
 # plot ----
 ```{r}
 exp = "8"
-day = 12
+day = 16
 my_comps = list("B16-only" = "B16")
 
 

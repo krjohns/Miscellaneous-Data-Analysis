@@ -19,14 +19,41 @@ library(cowplot)
 # directories ----
 ```{r}
 wd = getwd()
-input_dir = fs::path(wd, "../../input/data")
-output_dir = fs::path(wd, "../../output/2024/2024_06/20240628/CtuKO")
+input_dir = fs::path(wd, "../../../../../input/data")
+output_dir = fs::path(wd, "../../../../../output/2024/2024_06/20240628/CtuKO/20250206")
+```
+
+#theme
+```{r}
+# Plot settings ----
+#compress PDFs
+tools::compactPDF('mypdfs/',  gs_quality='screen')
+###PLOTTING THEME ###
+theme_update(text = element_text(size = rel(4)),
+             legend.title = element_text(size = rel(2.5)),
+             legend.key.size = unit(.1, 'inches'),
+             legend.text = element_text(size = rel(2)),
+             panel.background = element_rect(fill = "white", colour = "black"),
+             axis.line = element_blank(),
+             axis.text.x = element_text(size=rel(3)),
+             axis.text.y = element_text(size=rel(2.5)),
+             axis.title.y = element_text(margin=margin(t = 0.5, r = 0.5, 
+                                                       b = 0.5, l = 0.5),
+                                         size=rel(3)),
+             axis.title.x = element_text(size=rel(3)),
+             plot.title = element_text(size = rel(3), face= "bold",
+                                       hjust=0.5),
+             plot.margin = unit(c(0.08, 0.1, 0.01, 0.01), "inches"),
+             strip.text.x = element_text(size = rel(3), face = "bold", margin = margin(0.05,0.05,0.05,0.05, "cm")),
+             strip.text.y = element_text(size = rel(3), face = "bold", margin = margin(0.05,0.05,0.05,0.05, "cm")),
+             strip.background = element_rect(linewidth=0.35, color="black"),
+             legend.key = element_rect(colour = NA, fill = NA)) #trbl
 ```
 
 # load data ----
 ```{r}
-ids = read.csv(path(input_dir, "2024/2024_06/sno_scrn/sno_target_ids.csv")) 
-dat = read.csv(path(input_dir, "2024/2024_06/sno_scrn2/20240628_snoscrn_repeat_L100.csv")) 
+#ids = read.csv(fs::path(input_dir, "2024/2024_06/sno_scrn/sno_target_ids.csv")) 
+dat = read.csv(fs::path(input_dir, "2024/2024_06/sno_scrn2/20240628_snoscrn_repeat_L100.csv")) 
       
 ```
 
@@ -36,7 +63,7 @@ dat = read.csv(path(input_dir, "2024/2024_06/sno_scrn2/20240628_snoscrn_repeat_L
 df = dat %>%
      data.frame() %>%
      filter(sample_type != "Standard" & sample != "empty") %>% # drop standard rows
-     select(-c(experiment, well, dilution, sample_type)) %>% # drop dilution,experiment, well column (not needed)
+     dplyr::select(-c(experiment, well, dilution, sample_type)) %>% # drop dilution,experiment, well column (not needed)
      rename_all(~gsub("[A-B][0-9]+$", "", gsub("\\.", "", .))) %>% # rename cols to simplify
      mutate(Experiment = ifelse(grepl("sg", sample), "Ctu", "Sno")) %>%
      filter(Experiment == "Ctu") %>%
@@ -46,81 +73,99 @@ df = dat %>%
             Sample_Guide = gsub("_.*", "", sample)) %>%
      mutate_all(~ifelse(is.na(.), "NA", .)) %>%
      mutate_all(~gsub("<", "", gsub(">","",.))) %>% # remove < sign from df
-     rename(Replicate = replicate) %>%
-     #remove ctu samples
+     rename_all(~str_to_title(.)) %>%
+     #remove extraneous
      dplyr::select(-Experiment) 
     
-
-
-#average reps and compute se
-plot_me = df %>%
-          pivot_longer(cols = -c(Target, Treatment, Guide, Sample_Guide, Replicate, sample), 
-                       names_to = "Cytokine", values_to = "Concentration") %>%
-          #dplyr::select(-Name) %>% #drop for pivoting
-          mutate_at(vars(Concentration), ~as.numeric(.)) %>%# make concentrations numeric
-          pivot_wider(names_from = Replicate, 
-                      values_from = Concentration, names_prefix = "Rep_",) %>%
-          rowwise() %>% # prep for rowwise calcs
-          mutate(avg_conc = mean(c(Rep_1, Rep_2), na.rm=T), # compute average and stdev
-                 stdev = sd(c(Rep_1, Rep_2), na.rm=T),
-                 se =  stdev/sqrt(2)) 
 ```
 
 
 # plotting! ----
 ```{r, warning = F}
+cyt_decoder = c("Kc" = "Cxcl1", "Rantes" = "Ccl5", 
+                "Mcp1" = "Ccl2", "Gmcsf" = "Csf2",
+                "Ip10" = "Cxcl10")
 
-Cytokines = plot_me %>% select(Cytokine) %>%
+#average reps and compute se
+plot_me = df %>%
+          pivot_longer(cols = -c(Target, Treatment, Guide, 
+                                 Sample_guide, Replicate, Sample), 
+                       names_to = "Cytokine", 
+                       values_to = "Concentration") %>%
+          #dplyr::select(-Name) %>% #drop for pivoting
+          mutate_at(vars(Concentration), ~as.numeric(.)) %>%
+          mutate(Cytokine = ifelse(Cytokine %in% names(cyt_decoder),
+                                   plyr::mapvalues(Cytokine, 
+                                    from = names(cyt_decoder),
+                                    to = cyt_decoder), Cytokine))
+
+Cytokines = plot_me %>% dplyr::select(Cytokine) %>%
             unique() %>% 
             unlist() %>%
             sort()
 
-control_means = plot_me %>% 
+cytokines3 = c("Cxcl10", "Ccl2","Il10","Il12p70", "Il6", "Tnfa")
+cytokines4 = c("Ifnb", "Ifng","Il10","Il12p70")
+cytokines5 = c("Il1b", "Il6","Tnfa")
+
+plot_me_filt = plot_me %>%
+           filter(Cytokine %in% cytokines5)
+
+
+means =   plot_me_filt %>%
+          group_by(Target, Treatment, Cytokine) %>%
+          summarise(n = n(),
+                    avg_conc = mean(Concentration, na.rm=T),
+                    se = sd(Concentration/sqrt(n)))
+
+control_means = means %>% 
                 filter(Target == "sgCtrl") %>%
-                dplyr::select(sample, Cytokine, Treatment, avg_conc) %>%
+                dplyr::select(Cytokine, Treatment, avg_conc) %>%
                 ungroup() %>%
                 group_by(Cytokine, Treatment) %>%
-                #rowwise() %>%
                 summarise(control_mean = mean(avg_conc)) %>%
                 mutate(Cytokine = factor(Cytokine, levels = Cytokines))
 
-
-plot_me2 <- plot_me %>% 
+plot_me2 <- plot_me_filt %>% 
             full_join(control_means, by = c("Cytokine", "Treatment")) %>%
-            #filter(pool == F) %>%
-            mutate(sample2 = ifelse(Target == "Ctrl", sample, Target)) %>%
+            mutate(sample2 = ifelse(Target == "sgCtrl", Sample, Target)) %>%
             arrange(Target, Guide, Cytokine)
 
-
 plot_me3 = plot_me2 %>% 
-           mutate(sample2 = factor(sample2, levels = unique(plot_me2$sample2)),
-                   Cytokine = factor(Cytokine, levels = Cytokines))
+           mutate(sample2 = factor(sample2, 
+                  levels = unique(plot_me2$sample2)),
+                  Cytokine = factor(Cytokine, levels = Cytokines))
 
-p<-ggplot(plot_me3 %>% filter(Cytokine %in% Cytokines[1:6] & 
-                             Treatment == "L100"),
-          aes(x = Sample_Guide, y = avg_conc, fill = Treatment,
-              alpha = Target)) +
+p<-ggplot(means,
+          aes(x = Target, y = avg_conc, fill = Target)) +
   geom_col(stat = "identity", position = position_dodge(0.9),
            color = "black") +
+  geom_point(data = plot_me3, aes(x = Target, y = Concentration, 
+                                  fill = Treatment),
+             size=1) +
   geom_errorbar(mapping =aes(ymin= avg_conc - se, ymax= avg_conc + se), 
                           width=0.4, 
                           position = position_dodge(0.9), 
                           stat = "identity", 
                           colour="black", alpha=0.9, size=0.5) +
-  scale_fill_manual(values = c(L100 = "#B9CEE6",
-                               LSG = "#F68064")) +
+  scale_fill_manual(values = c("sgScr" ="grey80",
+                               "sgCtu1" ="#D278AE", 
+                               "sgCtu2" = "#9E7FB8")) +
   scale_alpha_manual(values = c(0.1, 0.7,1)) +
   labs(y = "Concentration (pg/mL)", x = NULL) +
-  facet_wrap(~Cytokine, scales = "free_y") +
-  geom_hline(aes(yintercept  = control_mean), linetype = 2, color = "black") +
+  ggh4x::facet_grid2(Cytokine~Treatment, independent = "y", 
+                     scales = "free") +
+  geom_hline(data = plot_me3, aes(yintercept  = control_mean),
+             linetype = 2, color = "black") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         legend.position = "none",
-        text = element_text(size = 12)) +
-        guides(fill = guide_legend(nrow=1))
+        text = element_text(size = 3.5)) +
+        guides(fill = guide_legend(nrow=1)) +
+  scale_y_continuous(expand = expansion(mult = c(0,.2)))
              
-
-save_plot(path(output_dir, "L100/L100_cytokines1-6.pdf"), p, 
-          dpi = 90, base_aspect_ratio = 3)
+p
+save_plot(fs::path(output_dir, "Aggregated_by_target_exp1-2_shared2.pdf"), p, 
+          dpi = 90, base_aspect_ratio = 0.75)
 
 ```
 

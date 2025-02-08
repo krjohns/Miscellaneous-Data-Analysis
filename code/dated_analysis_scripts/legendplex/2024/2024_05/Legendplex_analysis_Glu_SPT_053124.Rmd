@@ -19,13 +19,13 @@ library(cowplot)
 # directories ----
 ```{r}
 wd = getwd()
-input_dir = fs::path(wd, "../../input/data")
-output_dir = fs::path(wd, "../../output/2024/2024_05")
+input_dir = fs::path(wd, "../../../../../input/data")
+output_dir = fs::path(wd, "../../../../../output/2024/2024_05")
 ```
 
 # load data ----
 ```{r}
-dat = read.csv(path(input_dir, "2024/2024_05/20240531_Legendplex_Glu_SPT.csv")) 
+dat = read.csv(fs::path(input_dir, "2024/2024_05/20240531_Legendplex_Glu_SPT.csv")) 
       
 ```
 
@@ -35,7 +35,7 @@ dat = read.csv(path(input_dir, "2024/2024_05/20240531_Legendplex_Glu_SPT.csv"))
 df = dat %>%
      data.frame() %>%
      filter(sample_type != "Standard" & sample != "none") %>% # drop standard rows
-     select(-c(experiment, well, dilution, sample_type)) %>% # drop dilution,experiment, well column (not needed)
+     dplyr::select(-c(experiment, well, dilution, sample_type)) %>% # drop dilution,experiment, well column (not needed)
      rename_all(~gsub("[A-B][0-9]+$", "", gsub("\\.", "", .))) %>% # rename cols to simplify
      separate(sample, 
               into =c("Perturbation", "Treatment"), 
@@ -43,81 +43,235 @@ df = dat %>%
      mutate_all(~gsub("<", "", gsub(">","",.))) %>% # remove < sign from df
      #add exp col to separate out
      mutate(Exp = ifelse(grepl("Ctu|SCR$", Perturbation), "Ctu", "Glu")) %>%
-     rename(Replicate = replicate)
+     rename_all(~str_to_title(.)) %>%
+     filter(!(grepl("pLENTI|^sgSCR$", Perturbation))) %>%
+     mutate(Perturbation =ifelse(grepl("SCR", Perturbation),
+                                 "sgSCR", Perturbation))
 
 
-#average reps and compute se
-plot_me = df %>%
-          pivot_longer(cols = -c(Perturbation, Exp, Treatment,Replicate), 
-                       names_to = "Cytokine", values_to = "Concentration") %>%
-          #dplyr::select(-Name) %>% #drop for pivoting
-          mutate_at(vars(Concentration), ~as.numeric(.)) %>%# make concentrations numeric
-          pivot_wider(names_from = Replicate, values_from = Concentration, names_prefix = "Rep_",) %>%
-          rowwise() %>% # prep for rowwise calcs
-          mutate(avg_conc = mean(c(Rep_1, Rep_2), na.rm=T), # compute average and stdev
-                 stdev = sd(c(Rep_1, Rep_2), na.rm=T),
-                 se = ifelse(grepl("Crop|pLENTI", Perturbation), stdev, stdev/sqrt(2))) 
 ```
 
 
 # plotting! ----
-```{r, warning = F}
-#source(path(wd, "4_plotting_fxns.R"))
+#ctu analysis
+```{r, show_warning = F}
+cyt_decoder = c("Kc" = "Cxcl1", "Rantes" = "Ccl5", 
+                "Mcp1" = "Ccl2", "Gmcsf" = "Csf2",
+                "Ip10" = "Cxcl10")
+
+#average reps and compute se
+plot_me = df %>%
+          pivot_longer(cols = -c(Perturbation, Exp, Treatment,Replicate), 
+                       names_to = "Cytokine", 
+                       values_to = "Concentration") %>%
+          #dplyr::select(-Name) %>% #drop for pivoting
+          mutate_at(vars(Concentration),
+                    ~as.numeric(.)) %>%
+          mutate(Cytokine = ifelse(Cytokine %in% names(cyt_decoder),
+                                   plyr::mapvalues(Cytokine, 
+                                    from = names(cyt_decoder),
+                                    to = cyt_decoder), Cytokine))
+
+Cytokines = plot_me %>% dplyr::select(Cytokine) %>%
+            unique() %>% 
+            unlist() %>%
+            sort()
+
 #prep factors etc for plotting
-plot_me2 = plot_me %>%
+plot_me_filt = plot_me %>%
                 #assign type info for coloring in plot
           mutate(#factor treatment for correct ordering
-                 Treatment = factor(Treatment, levels = c("Control","L", "S",
-                                                          "G", "LS", "LG", "SG", "LSG")), 
-                 
+                 Treatment = factor(Treatment, 
+                                    levels = c("Control","L", "S",
+                                       "G", "LS", "LG", "SG", "LSG")), 
                  Perturbation = factor(Perturbation, 
-                                       levels =c ("sgSCR-CropSeq", "sgSCR-pLENTI100",
-                                                  "sgSCR", "GluCTC-1.1", 
-                                                  "GluTTC-1.3", "sgCtu1-g1",
-                                                  "sgCtu1-g26", "sgCtu2-g6", "sgCtu2-g31")),
+                                levels =c ("sgSCR",
+                                         "GluCTC-1.1", 
+                                         "GluTTC-1.3", "sgCtu1-g1",
+                                         "sgCtu1-g26", "sgCtu2-g6",
+                                         "sgCtu2-g31")),
                  Guide = gsub(".*-", "", Perturbation),
                  Guide = gsub("g26", "g2",
-                              gsub("g31", "g2",
-                                   gsub("g6", "g1",
-                                        gsub("CropSeq", "g1",
-                                        gsub("pLENTI100", "g2",
-                                        gsub("sgSCR", "g1", Guide)))))),
-                 Guide = factor(Guide, levels = c("1.1", "1.3", "g1", "g2"))) 
+                          gsub("g31", "g2",
+                            gsub("g6", "g1",
+                              Guide))),
+                 Guide = factor(Guide, 
+                                levels = c("1.1", "1.3", "g1", "g2"))) %>%
+            separate(Perturbation, into = c("Target", "Guide"), 
+                                          sep="-", remove =F) %>%
+            mutate(Sample_guide = str_c(Target, "_", Guide)) %>%
+            filter(Cytokine %in% cytokines[7:13] & 
+                     grepl("SCR|Ctu", Perturbation))
 
 #artificially add controls
+means =   plot_me_filt %>%
+          group_by(Target, Treatment, Cytokine) %>%
+          summarise(n = n(),
+                    avg_conc = mean(Concentration, na.rm=T),
+                    se = sd(Concentration/sqrt(n))) %>%
+          mutate(Cytokine = factor(Cytokine, levels = Cytokines),
+                  Target = factor(Target, levels = c("sgSCR", "sgCtu1",
+                                                     "sgCtu2")))
 
-cytokines = unique(plot_me$Cytokine) %>% sort()
-int_list = c("IFNg", "IL10", "IL23","IL27","IL12p70","IL1a", "IL1b","IL6", "MCP1", "TNFa")
-int_list = c("IL27","IL12p70","IL1a", "IL1b","IL6")
+control_means = means %>% 
+                filter(grepl("SCR", Target)) %>%
+                dplyr::select(Cytokine, Treatment, avg_conc) %>%
+                ungroup() %>%
+                group_by(Cytokine, Treatment) %>%
+                summarise(control_mean = mean(avg_conc)) %>%
+                mutate(Cytokine = factor(Cytokine, levels = Cytokines))
+
+plot_me2 <- plot_me_filt %>% 
+            full_join(control_means, by = c("Cytokine", "Treatment")) %>%
+            arrange(Target, Cytokine)
+
+plot_me3 = plot_me2 %>% 
+           mutate(Cytokine = factor(Cytokine, levels = Cytokines),
+                  Target = factor(Target, levels = c("sgSCR", "sgCtu1",
+                                                     "sgCtu2")))
 
 
-p<-ggplot(plot_me2 %>% filter(!(grepl("Ctu|pLENTI|SCR$", Perturbation)) & 
-                                Cytokine %in% cytokines[1:4]
-                          ),
-          aes(x = Perturbation, y = avg_conc, fill = Treatment, alpha = Guide)) +
+p<-ggplot(means,
+          aes(x = Target, y = avg_conc, fill = Target)) +
   geom_col(stat = "identity", position = position_dodge(0.9),
            color = "black") +
+  geom_point(data = plot_me3, aes(x = Target, y = Concentration, 
+                                  fill = Treatment),
+             size=0.5) +
   geom_errorbar(mapping =aes(ymin= avg_conc - se, ymax= avg_conc + se), 
-                          width=0.4, 
+                          #width=0.4, 
                           position = position_dodge(0.9), 
                           stat = "identity", 
                           colour="black", alpha=0.9, size=0.5) +
-  scale_fill_manual(values = c(Control = "grey40", 
-                               L = "#B9CEE6",S = "#8C9FCA", G = "#707FA1",
-                               LS = "#68C3A5" ,LG = "#539C84" , SG = "#3E7563",
-                               LSG = "#F68064" )) +
-  scale_alpha_manual(values = c(0.8, 0.6, 1,1)) +
+  scale_fill_manual(values = c("sgSCR" ="grey80",
+                               "sgCtu1" ="#D278AE", 
+                               "sgCtu2" = "#9E7FB8")) +
+  scale_alpha_manual(values = c(0.1, 0.7,1)) +
   labs(y = "Concentration (pg/mL)", x = NULL) +
-  facet_grid(Cytokine~Treatment, scales = "free_y") +
+  ggh4x::facet_grid2(Cytokine~Treatment, independent = "y", 
+                     scales = "free") +
+  geom_hline(data = plot_me3, aes(yintercept  = control_mean),
+             linetype = 2, color = "black") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         legend.position = "none",
-        text = element_text(size = 10)) +
-  guides(fill = guide_legend(nrow=1))
-             
+        text = element_text(size = 3.5)) +
+        guides(fill = guide_legend(nrow=1)) +
+  scale_y_continuous(expand = expansion(mult = c(0,.3))) 
+p
 
-
-save_plot(path(output_dir, "20240530/Glu_Ctu_SPT/Glu/plate_controls/all_treatments_1.pdf"), 
-          p, dpi = 90, base_aspect_ratio = 1.8)
+save_plot(fs::path(output_dir, "20240530/Glu_Ctu_SPT/Ctu/20250602/all_treatments_2.pdf"), 
+          p, dpi = 90, base_aspect_ratio = 2.5)
 p
 ```
+#Glu analysis
+```{r, show_warning = F}
+cyt_decoder = c("Kc" = "Cxcl1", "Rantes" = "Ccl5", 
+                "Mcp1" = "Ccl2", "Gmcsf" = "Csf2",
+                "Ip10" = "Cxcl10")
 
+#average reps and compute se
+plot_me = df %>%
+          pivot_longer(cols = -c(Perturbation, Exp, Treatment,Replicate), 
+                       names_to = "Cytokine", 
+                       values_to = "Concentration") %>%
+          #dplyr::select(-Name) %>% #drop for pivoting
+          mutate_at(vars(Concentration),
+                    ~as.numeric(.)) %>%
+          mutate(Cytokine = ifelse(Cytokine %in% names(cyt_decoder),
+                                   plyr::mapvalues(Cytokine, 
+                                    from = names(cyt_decoder),
+                                    to = cyt_decoder), Cytokine))
+
+Cytokines = plot_me %>% dplyr::select(Cytokine) %>%
+            unique() %>% 
+            unlist() %>%
+            sort()
+
+#prep factors etc for plotting
+plot_me_filt = plot_me %>%
+                #assign type info for coloring in plot
+          mutate(#factor treatment for correct ordering
+                 Treatment = factor(Treatment, 
+                                    levels = c("Control","L", "S",
+                                       "G", "LS", "LG", "SG", "LSG")), 
+                 Perturbation = factor(Perturbation, 
+                                levels =c ("sgSCR",
+                                         "GluCTC-1.1", 
+                                         "GluTTC-1.3", "sgCtu1-g1",
+                                         "sgCtu1-g26", "sgCtu2-g6",
+                                         "sgCtu2-g31")),
+                 Guide = gsub(".*-", "", Perturbation),
+                 Guide = gsub("g26", "g2",
+                          gsub("g31", "g2",
+                            gsub("g6", "g1",
+                              Guide))),
+                 Guide = factor(Guide, 
+                                levels = c("1.1", "1.3", "g1", "g2"))) %>%
+            separate(Perturbation, into = c("Target", "Guide"), 
+                                          sep="-", remove =F) %>%
+            mutate(Sample_guide = str_c(Target, "_", Guide)) %>%
+            filter(Cytokine %in% cytokines[1:6] & 
+                     grepl("SCR|TC", Perturbation))
+
+#artificially add controls
+means =   plot_me_filt %>%
+          group_by(Target, Treatment, Cytokine) %>%
+          summarise(n = n(),
+                    avg_conc = mean(Concentration, na.rm=T),
+                    se = sd(Concentration/sqrt(n))) %>%
+          mutate(Cytokine = factor(Cytokine, levels = Cytokines),
+                  Target = factor(Target, levels = c("sgSCR", "GluCTC",
+                                                     "GluTTC")))
+
+control_means = means %>% 
+                filter(grepl("SCR", Target)) %>%
+                dplyr::select(Cytokine, Treatment, avg_conc) %>%
+                ungroup() %>%
+                group_by(Cytokine, Treatment) %>%
+                summarise(control_mean = mean(avg_conc)) %>%
+                mutate(Cytokine = factor(Cytokine, levels = Cytokines))
+
+plot_me2 <- plot_me_filt %>% 
+            full_join(control_means, by = c("Cytokine", "Treatment")) %>%
+            arrange(Target, Cytokine)
+
+plot_me3 = plot_me2 %>% 
+           mutate(Cytokine = factor(Cytokine, levels = Cytokines),
+                  Target = factor(Target, levels = c("sgSCR", "GluCTC",
+                                                     "GluTTC")))
+
+
+p<-ggplot(means,
+          aes(x = Target, y = avg_conc, fill = Treatment)) +
+  geom_col( position = position_dodge(0.9),
+           color = "black") +
+  geom_point(data = plot_me3, aes(x = Target, y = Concentration, 
+                                  fill = Treatment),
+             size=0.5) +
+  geom_errorbar(mapping =aes(ymin= avg_conc - se, ymax= avg_conc + se), 
+                          #width=0.4, 
+                          position = position_dodge(0.9), 
+                          stat = "identity", 
+                          colour="black", alpha=0.9, size=0.5) +
+  scale_fill_manual(values = c(Control = "grey72", 
+                               L = "#B9CEE6",S = "#8C9FCA", G = "#707FA1", 
+                               LS = "#68C3A5" , LG = "#539C84" , SG = "#3E7563",
+                               LSG = "#F68064" )) +
+  scale_alpha_manual(values = c(0.1, 0.7,1)) +
+  labs(y = "Concentration (pg/mL)", x = NULL) +
+  #ggh4x::facet_grid2(Cytokine~Treatment, independent = "y", 
+                  #   scales = "free") +
+  facet_grid(Cytokine~Treatment,scales = "free_y")+
+  geom_hline(data = plot_me3, aes(yintercept  = control_mean),
+             linetype = 2, color = "black") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none",
+        text = element_text(size = 3.5)) +
+        guides(fill = guide_legend(nrow=1)) +
+  scale_y_continuous(expand = expansion(mult = c(0,.3))) 
+p
+
+save_plot(fs::path(output_dir, "20240530/Glu_Ctu_SPT/Glu/20250602/all_treatments_1_samescale.pdf"), 
+          p, dpi = 90, base_aspect_ratio = 1.75)
+
+```

@@ -58,7 +58,7 @@ dat = read_excel(path(input_dir, "20250122_b16_tumor_exp9.xlsx"), sheet = "measu
 # plot ----
 ```{r}
 exp = "9"
-day = 7
+day = 11
 my_comps = list("SCR-OVA-LSG" = "OVA|SCR-LSG", "SCR-OVA-Ctu2g1" = "SCR-OVA|Ctu2_g1",
                 "SCR-LSG-Ctu2g1" = "SCR-LSG|Ctu2_g1", "SCR-OVA-Ctu2g2" = "OVA|Ctu2_g2",
                 "SCR-LSG-Ctu2g2" = "SCR-LSG|Ctu2_g2")
@@ -103,7 +103,8 @@ p_base <-ggplot(plot_me, aes(x = Day, y = Volume, color = Condition))+
                                 "sgCtu2_g2-LSG" ="orchid4")) +
          labs(x = "Time (Days)", y = "Tumor Volume (mm<sup>3</sup>)", 
               title = str_c("KJ B16-TE-", exp)) +
-         theme(axis.title.y = element_markdown())
+         theme(axis.title.y = element_markdown(),
+               legend.position = "none")
    
 p_indiv<-p_base +
          geom_line(aes (
@@ -136,7 +137,7 @@ for(j in (1:length(p_list))){
    save_plot(path(output_dir, str_c("TE", exp,"/d", as.character(day),"/d", as.character(day),"_all_cages/",
                 names(my_comps)[[i]], "/tumor_vol_TE", exp, "-",names(my_comps)[[i]],
                 names(p_list)[j], ".pdf")),
-                p_list[[j]], base_aspect_ratio =1.3)
+                p_list[[j]], base_aspect_ratio =1)
   }
 }
 
